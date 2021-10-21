@@ -1,11 +1,11 @@
-package com.github.paulbakker.dgsintellijplugin
+package com.netflix.dgs.plugin
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
 @NonNls
-private const val BUNDLE = "messages.MyBundle"
+private const val BUNDLE = "messages.DGSMessages"
 
 object MyBundle : DynamicBundle(BUNDLE) {
 

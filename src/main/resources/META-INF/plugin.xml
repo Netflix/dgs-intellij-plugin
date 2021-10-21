@@ -1,18 +1,17 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.paulbakker.dgsintellijplugin</id>
-    <name>dgs-intellij-plugin</name>
-    <vendor>paulbakker</vendor>
+    <id>com.netflix.dgs.intellijplugin</id>
+    <name>DGS</name>
+    <vendor>Netflix</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <resource-bundle>messages.DGSMessages</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.paulbakker.dgsintellijplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.paulbakker.dgsintellijplugin.services.MyProjectService"/>
+        <localInspection language="UAST" implementationClass="com.netflix.dgs.plugin.hints.DgsComponentInspector"
+                         enabledByDefault="true" groupName="DGS inspections" groupPathKey="dgs"
+                         key="dgs.inspection.missing.component.annotation"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.paulbakker.dgsintellijplugin.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>
