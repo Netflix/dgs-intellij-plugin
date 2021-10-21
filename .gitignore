@@ -1,4 +1,6 @@
 .gradle
-.idea
+.idea/*.xml
+.idea/*.iml
+.idea/.gitignore
 .qodana
 build
