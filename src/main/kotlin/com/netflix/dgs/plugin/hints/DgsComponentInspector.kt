@@ -91,7 +91,6 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
             val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
             val annotationFromText: PsiAnnotation = factory.createAnnotationFromText("@DgsComponent", null)
 
-
             val importStatement = factory.createImportStatement(factory.createTypeByFQClassName("com.netflix.graphql.dgs.DgsComponent").resolve()!!)
             val importList = (clazz.containingFile as PsiJavaFile).importList
             if(importList?.importStatements?.any { it.qualifiedName == "com.netflix.graphql.dgs.DgsComponent" } == false) {
