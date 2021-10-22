@@ -27,8 +27,15 @@ import com.intellij.psi.*
 import com.intellij.psi.impl.light.LightPsiClassBuilder
 import com.intellij.psi.util.PsiUtil
 import com.intellij.uast.UastVisitorAdapter
+import com.intellij.util.castSafelyTo
 import com.netflix.dgs.plugin.MyBundle
+import org.jetbrains.kotlin.idea.core.ShortenReferences
+import org.jetbrains.kotlin.idea.util.addAnnotation
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.nj2k.NewJavaToKotlinConverter.Companion.addImports
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.uast.UClass
+import org.jetbrains.uast.getUastParentOfType
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 import java.util.*
 
@@ -87,17 +94,26 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
         }
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-            val clazz: PsiClass = descriptor.psiElement.parent as PsiClass
-            val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
-            val annotationFromText: PsiAnnotation = factory.createAnnotationFromText("@DgsComponent", null)
+            val clazz: UClass = descriptor.psiElement.getUastParentOfType(UClass::class.java)!!
 
-            val importStatement = factory.createImportStatement(factory.createTypeByFQClassName("com.netflix.graphql.dgs.DgsComponent").resolve()!!)
-            val importList = (clazz.containingFile as PsiJavaFile).importList
-            if(importList?.importStatements?.any { it.qualifiedName == "com.netflix.graphql.dgs.DgsComponent" } == false) {
-                importList.add(importStatement)
+            val sourcePsi = clazz.sourcePsi
+            if(sourcePsi is PsiClass) {
+                val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
+                val annotationFromText: PsiAnnotation = factory.createAnnotationFromText("@DgsComponent", null)
+                val firstModifier = sourcePsi.modifierList?.firstChild
+                if(firstModifier != null) {
+                    sourcePsi.modifierList?.addBefore(annotationFromText, firstModifier)
+                } else {
+                    sourcePsi.addBefore(annotationFromText, sourcePsi)
+                }
+
+                val importStatement = factory.createImportStatement(factory.createTypeByFQClassName("com.netflix.graphql.dgs.DgsComponent").resolve()!!)
+                sourcePsi.containingFile.castSafelyTo<PsiJavaFile>()?.importList?.add(importStatement)
+            } else if(sourcePsi is KtClass) {
+                val fqName = FqName("com.netflix.graphql.dgs.DgsComponent")
+                sourcePsi.addAnnotation(fqName)
             }
 
-            clazz.modifierList?.addBefore(annotationFromText, clazz.modifierList!!.firstChild)
         }
     }
 }

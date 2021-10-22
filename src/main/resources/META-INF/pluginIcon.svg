@@ -1,11 +1,17 @@
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M32.0845 7.94025V4H24.0203V7.9896H16.029V4H7.91553V7.94025H4V36H16.0044V32.0045C16.0058 30.9457 16.4274 29.9308 17.1766 29.1826C17.9258 28.4345 18.9412 28.0143 20 28.0143C21.0588 28.0143 22.0743 28.4345 22.8234 29.1826C23.5726 29.9308 23.9942 30.9457 23.9956 32.0045V36H36V7.94025H32.0845Z"
-          fill="url(#paint0_linear)"/>
-    <defs>
-        <linearGradient id="paint0_linear" x1="2.94192" y1="4.89955" x2="37.7772" y2="39.7345" gradientUnits="userSpaceOnUse">
-            <stop offset="0.15937" stop-color="#3BEA62"/>
-            <stop offset="0.5404" stop-color="#3C99CC"/>
-            <stop offset="0.93739" stop-color="#6B57FF"/>
-        </linearGradient>
-    </defs>
-</svg>
+<!--
+  - Copyright 2021 Netflix, Inc.
+  -
+  - Licensed under the Apache License, Version 2.0 (the "License");
+  - you may not use this file except in compliance with the License.
+  - You may obtain a copy of the License at
+  -
+  -    http://www.apache.org/licenses/LICENSE-2.0
+  -
+  - Unless required by applicable law or agreed to in writing, software
+  - distributed under the License is distributed on an "AS IS" BASIS,
+  - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  - See the License for the specific language governing permissions and
+  - limitations under the License.
+  -->
+
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path d="m0 0h256v256h-256z" fill="none"/><path d="m210.53 153.14v-50.44a18.62 18.62 0 1 0 -18.11-31.35l-46.52-26.9a18.68 18.68 0 1 0 -36.22 0l-46.14 26.87a18.62 18.62 0 1 0 -18.07 31.38v51.73a18.66 18.66 0 1 0 18.92 5.08l59-101.27a17.21 17.21 0 0 0 8.86 0l59.25 100.12a18.67 18.67 0 1 0 19-5.18zm-141.06-68.24a19 19 0 0 0 -.56-4.36l44.09-25.64-56.86 97.58v-49.78a18.59 18.59 0 0 0 13.33-17.8zm130.39 17.8v48.75l-57.11-96.45 44.33 25.63a18.36 18.36 0 0 0 12.78 22.12zm-79.86 33.68a10.67 10.67 0 1 1 0-21.33h16a10.67 10.67 0 1 1 0 21.33zm-18.67 26.67h53.34a10.67 10.67 0 0 1 0 21.33h-53.34a10.67 10.67 0 0 1 0-21.33zm90.67 61.33a10.67 10.67 0 0 1 -10.67 10.67h-106.66a10.67 10.67 0 1 1 0-21.34h106.66a10.67 10.67 0 0 1 10.67 10.67z" fill="#e50914"/></svg>

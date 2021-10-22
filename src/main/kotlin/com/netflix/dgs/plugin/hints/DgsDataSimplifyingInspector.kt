@@ -23,7 +23,15 @@ import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
 import com.intellij.uast.UastVisitorAdapter
 import com.netflix.dgs.plugin.MyBundle
+import org.jetbrains.kotlin.idea.util.addAnnotation
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.nj2k.NewJavaToKotlinConverter.Companion.addImports
+import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.kotlin.declarations.KotlinUMethod
+import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 
 class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
@@ -32,7 +40,6 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
             override fun visitMethod(node: UMethod): Boolean {
                 if (node.hasAnnotation(DGS_DATA_ANNOTATION)) {
                     val dgsDataAnnotation = node.getAnnotation(DGS_DATA_ANNOTATION)
-
                     val parentTypeValue =
                         (dgsDataAnnotation?.findAttribute("parentType")?.attributeValue as JvmAnnotationConstantValue).constantValue
                     if (parentTypeValue == "Query" || parentTypeValue == "Mutation" || parentTypeValue == "Subscription") {
@@ -42,7 +49,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                             "@Dgs${parentTypeValue}"
                         )
                         holder.registerProblem(
-                            dgsDataAnnotation,
+                            dgsDataAnnotation.toUElement()?.sourcePsi!!,
                             message,
                             ProblemHighlightType.WEAK_WARNING,
                             DgsDataQuickFix("@Dgs${parentTypeValue}", message)
@@ -70,15 +77,24 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
             val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
-            descriptor.psiElement.replace(factory.createAnnotationFromText(newAnnotation, null))
+            val file = descriptor.psiElement.parentOfType<PsiFile>()
+            val method = descriptor.psiElement.toUElement()?.getParentOfType<UMethod>()
 
-            val clazz = descriptor.psiElement.parentOfType<PsiClass>()
             val annotationFQN = "com.netflix.graphql.dgs.${newAnnotation.substringAfter("@")}"
-            val importStatement = factory.createImportStatement(factory.createTypeByFQClassName(annotationFQN).resolve()!!)
-            val importList = (clazz?.containingFile as PsiJavaFile).importList
-            if(importList?.importStatements?.any { it.qualifiedName == annotationFQN } == false) {
-                importList.add(importStatement)
+
+            if(file is PsiJavaFile) {
+                val importStatement = factory.createImportStatement(factory.createTypeByFQClassName(annotationFQN).resolve()!!)
+                val importList = file.importList
+                if(importList?.importStatements?.any { it.qualifiedName == annotationFQN } == false) {
+                    importList.add(importStatement)
+                }
+
+                method?.sourcePsi?.addBefore(factory.createAnnotationFromText("@DgsQuery", null), descriptor.psiElement)
+            } else if(file is KtFile) {
+                (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN))
             }
+
+            descriptor.psiElement.delete()
         }
 
     }
