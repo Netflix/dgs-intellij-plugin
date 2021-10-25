@@ -25,17 +25,8 @@ import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.netflix.dgs.plugin.hints.DgsComponentInspector
 
-class DgsComponentInspectorTest : LightJavaCodeInsightFixtureTestCase() {
+class DgsComponentInspectorTest : DgsTestCase() {
 
-    override fun getProjectDescriptor(): LightProjectDescriptor {
-        return DefaultLightProjectDescriptor()
-    }
-
-    override fun setUp() {
-        super.setUp()
-        loadLibrary(project, module, "graphql-dgs", "graphql-dgs-4.9.2.jar")
-
-    }
 
     fun testMissingDgsComponentAnnotation() {
         myFixture.configureByFile("MissingDgsComponent.java")
@@ -46,11 +37,5 @@ class DgsComponentInspectorTest : LightJavaCodeInsightFixtureTestCase() {
         myFixture.checkResultByFile("FixedMissingDgsComponent.java")
     }
 
-    private fun loadLibrary(projectDisposable: Disposable, module: Module, libraryName: String, libraryJarName: String) {
-        PsiTestUtil.addLibrary(projectDisposable, module, libraryName, "src/test/testData/lib/", libraryJarName)
-    }
-
     override fun getTestDataPath() = "src/test/testData/dgscomponenthint"
-
-
 }

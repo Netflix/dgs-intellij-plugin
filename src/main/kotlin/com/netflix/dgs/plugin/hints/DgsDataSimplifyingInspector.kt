@@ -28,10 +28,8 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.nj2k.NewJavaToKotlinConverter.Companion.addImports
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.*
 import org.jetbrains.uast.kotlin.declarations.KotlinUMethod
-import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 
 class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
@@ -78,6 +76,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
             val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
             val file = descriptor.psiElement.parentOfType<PsiFile>()
+            val fieldValue = (descriptor.psiElement.toUElement() as UAnnotation).findAttributeValue("field")?.evaluateString()
             val method = descriptor.psiElement.toUElement()?.getParentOfType<UMethod>()
 
             val annotationFQN = "com.netflix.graphql.dgs.${newAnnotation.substringAfter("@")}"
@@ -89,9 +88,19 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     importList.add(importStatement)
                 }
 
-                method?.sourcePsi?.addBefore(factory.createAnnotationFromText("@DgsQuery", null), descriptor.psiElement)
+                val newAnnotation = if(fieldValue != null && fieldValue != method?.name) {
+                    factory.createAnnotationFromText("${newAnnotation}(field = \"$fieldValue\")", null)
+                } else {
+                    factory.createAnnotationFromText(newAnnotation, null)
+                }
+
+                method?.sourcePsi?.addBefore(newAnnotation, descriptor.psiElement)
             } else if(file is KtFile) {
-                (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN))
+                    if(fieldValue != null && fieldValue != method?.name) {
+                        (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN), "field = \"${fieldValue}\"")
+                    } else {
+                        (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN))
+                    }
             }
 
             descriptor.psiElement.delete()

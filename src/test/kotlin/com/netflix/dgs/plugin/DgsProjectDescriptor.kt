@@ -16,29 +16,30 @@
 
 package com.netflix.dgs.plugin
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ContentEntry
 import com.intellij.openapi.roots.ModifiableRootModel
-import com.intellij.testFramework.LightProjectDescriptor
-import com.intellij.testFramework.PsiTestUtil
+import com.intellij.testFramework.IdeaTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import com.netflix.dgs.plugin.hints.DgsDataSimplifyingInspector
+import com.intellij.testFramework.fixtures.MavenDependencyUtil
 
-class DgsDataSimplifyingInspectorTest: DgsTestCase() {
+class DgsProjectDescriptor : DefaultLightProjectDescriptor() {
 
 
-    fun testSimplifyQuery() {
-        myFixture.configureByFile("UsingDgsDataForQuery.java")
-        myFixture.enableInspections(DgsDataSimplifyingInspector::class.java)
-        myFixture.checkHighlighting(false, false, true, true)
-//        myFixture.launchAction(myFixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
-//        myFixture.checkResultByFile("FixedDgsDataForQuery.java")
+    override fun getSdk(): Sdk {
+        return IdeaTestUtil.getMockJdk17()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
     }
 
 
-
-    override fun getTestDataPath() = "src/test/testData/dgsdata"
 }
-

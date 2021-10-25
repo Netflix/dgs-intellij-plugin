@@ -18,27 +18,34 @@ package com.netflix.dgs.plugin
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
-import com.intellij.openapi.roots.ContentEntry
-import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
-import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import com.netflix.dgs.plugin.hints.DgsDataSimplifyingInspector
+import com.intellij.testFramework.fixtures.MavenDependencyUtil
 
-class DgsDataSimplifyingInspectorTest: DgsTestCase() {
-
-
-    fun testSimplifyQuery() {
-        myFixture.configureByFile("UsingDgsDataForQuery.java")
-        myFixture.enableInspections(DgsDataSimplifyingInspector::class.java)
-        myFixture.checkHighlighting(false, false, true, true)
-//        myFixture.launchAction(myFixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
-//        myFixture.checkResultByFile("FixedDgsDataForQuery.java")
+abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
+    override fun getProjectDescriptor(): LightProjectDescriptor {
+        return DGS_PROJECT_DESCRIPTOR
     }
 
+    override fun setUp() {
+        super.setUp()
 
+        loadLibrary(project, module, "graphql-dgs", "graphql-dgs-4.9.2.jar")
+    }
 
-    override fun getTestDataPath() = "src/test/testData/dgsdata"
+    companion object {
+        val DGS_PROJECT_DESCRIPTOR = DgsProjectDescriptor()
+    }
+
+    private fun loadLibrary(
+        projectDisposable: Disposable,
+
+        module: Module,
+        libraryName: String,
+        libraryJarName: String
+    ) {
+        PsiTestUtil.addLibrary(projectDisposable, module, libraryName, "src/test/testdata/lib/", libraryJarName)
+    }
+
 }
-
