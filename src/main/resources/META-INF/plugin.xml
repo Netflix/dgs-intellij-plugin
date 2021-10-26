@@ -23,6 +23,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.kotlin</depends>
+    <depends>com.intellij.lang.jsgraphql</depends>
 
     <resource-bundle>messages.DGSMessages</resource-bundle>
 
@@ -33,5 +34,8 @@
         <localInspection language="UAST" implementationClass="com.netflix.dgs.plugin.hints.DgsDataSimplifyingInspector"
                          enabledByDefault="true" groupName="DGS inspections" groupPathKey="dgs"
                          key="dgs.inspection.dgsdata.simplify"/>
+
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="com.netflix.dgs.plugin.navigation.GraphQLTypeLineMarkerProvider"/>
     </extensions>
 </idea-plugin>
