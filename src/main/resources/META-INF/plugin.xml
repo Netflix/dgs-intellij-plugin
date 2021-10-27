@@ -35,7 +35,9 @@
                          enabledByDefault="true" groupName="DGS inspections" groupPathKey="dgs"
                          key="dgs.inspection.dgsdata.simplify"/>
 
-        <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="com.netflix.dgs.plugin.navigation.GraphQLTypeLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="UAST" implementationClass="com.netflix.dgs.plugin.navigation.DataFetcherToSchemaMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.SchemaToDataFetcherMarkerProvider"/>
+
+        <projectService serviceInterface="com.netflix.dgs.plugin.services.DgsService" serviceImplementation="com.netflix.dgs.plugin.services.DgsServiceImpl"/>
     </extensions>
 </idea-plugin>
