@@ -39,12 +39,6 @@ class SchemaToDataFetcherMarkerProvider: RelatedItemLineMarkerProvider() {
         val dgsService = element.project.getService(DgsService::class.java)
 
         if(element is GraphQLFieldDefinition) {
-//            val fieldName = element.getName()
-//            val parent = element.findParentOfType<GraphQLObjectTypeDefinition>()?:element.findParentOfType<GraphQLObjectTypeExtensionDefinition>()
-//            val typeName = parent?.getChildOfType<GraphQLTypeNameDefinition>()?:parent?.getChildOfType<GraphQLTypeName>()
-
-//            val dataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.parentType == typeName?.getName() && it.field == fieldName }
-
             val dataFetcher = dgsService.getDgsComponentIndex().dataFetchers.find { it.schemaPsi == element }
 
             if(dataFetcher != null) {

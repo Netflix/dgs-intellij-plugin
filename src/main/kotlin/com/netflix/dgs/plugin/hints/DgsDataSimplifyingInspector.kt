@@ -25,15 +25,14 @@ import com.intellij.uast.UastVisitorAdapter
 import com.netflix.dgs.plugin.MyBundle
 import org.jetbrains.kotlin.idea.util.addAnnotation
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.nj2k.NewJavaToKotlinConverter.Companion.addImports
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.uast.*
-import org.jetbrains.uast.kotlin.declarations.KotlinUMethod
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 
 class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
+
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
             override fun visitMethod(node: UMethod): Boolean {
                 if (node.hasAnnotation(DGS_DATA_ANNOTATION)) {

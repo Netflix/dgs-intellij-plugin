@@ -30,29 +30,37 @@ interface DgsService {
 }
 
 class DgsServiceImpl(private val project: Project) : DgsService {
+    private var cachedComponentIndex: DgsComponentIndex? = null
+
     override fun getDgsComponentIndex(): DgsComponentIndex {
-        val dgsComponentIndex = DgsComponentIndex()
-        val psiManager = PsiManager.getInstance(project)
-        val typeDefinitionRegistry =
-            GraphQLSchemaProvider.getInstance(project).getRegistryInfo(project.getTopLevelBuildScriptPsiFile()!!).typeDefinitionRegistry
-        val processor = DgsSourceCodeProcessor(dgsComponentIndex, typeDefinitionRegistry)
+        return if(cachedComponentIndex != null) {
+            cachedComponentIndex!!
+        } else {
+            val dgsComponentIndex = DgsComponentIndex()
+            val psiManager = PsiManager.getInstance(project)
+            val typeDefinitionRegistry =
+                GraphQLSchemaProvider.getInstance(project)
+                    .getRegistryInfo(project.getTopLevelBuildScriptPsiFile()!!).typeDefinitionRegistry
+            val processor = DgsSourceCodeProcessor(dgsComponentIndex, typeDefinitionRegistry)
 
-        FileTypeIndex.processFiles(
-            JavaFileType.INSTANCE,
-            {file ->
-                val psiFile = psiManager.findFile(file)
-                if (psiFile != null) {
-                    processor.process(psiFile)
-                }
-                true
-            },
-            GlobalSearchScope.getScopeRestrictedByFileTypes(
-                GlobalSearchScope.projectScope(project),
-                JavaFileType.INSTANCE
+            FileTypeIndex.processFiles(
+                JavaFileType.INSTANCE,
+                { file ->
+                    val psiFile = psiManager.findFile(file)
+                    if (psiFile != null) {
+                        processor.process(psiFile)
+                    }
+                    true
+                },
+                GlobalSearchScope.getScopeRestrictedByFileTypes(
+                    GlobalSearchScope.projectScope(project),
+                    JavaFileType.INSTANCE
+                )
             )
-        )
 
-        return dgsComponentIndex
+            cachedComponentIndex = dgsComponentIndex
+            dgsComponentIndex
+        }
     }
 }
 
