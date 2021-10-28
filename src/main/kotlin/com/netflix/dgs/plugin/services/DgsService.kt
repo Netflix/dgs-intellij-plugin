@@ -21,8 +21,7 @@ import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaEventListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.editor.event.BulkAwareDocumentListener
-import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -36,10 +35,7 @@ import com.intellij.util.messages.Topic
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.DgsEntityFetcher
 import org.jetbrains.kotlin.idea.KotlinFileType
-
 import org.jetbrains.kotlin.idea.extensions.gradle.getTopLevelBuildScriptPsiFile
-import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
-import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 
 
 interface DgsService {
@@ -98,6 +94,7 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
 
                             if(PsiTreeUtil.findChildrenOfType(psiFile, PsiAnnotation::class.java).any(DgsDataFetcher.Companion::isDataFetcherAnnotation)) {
                                 cachedComponentIndex = null
+                                EditorFactory.getInstance().refreshAllEditors()
                                 return@takeWhile false
                             }
                         }
@@ -106,6 +103,37 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
                     }
                 }
             })
+
+
+//            psiManager.addPsiTreeChangeListener(object: PsiTreeChangeAdapter(), Disposable {
+//                var myDocumentAlarm: Alarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
+//
+//                fun updateDocument(file: PsiFile) {
+//                    if (myDocumentAlarm.isDisposed) return
+//                    myDocumentAlarm.cancelAllRequests()
+//                    myDocumentAlarm.addRequest({
+//                        if(cachedComponentIndex != null) {
+//                            if (JavaFileType.INSTANCE == file.fileType || KotlinFileType.INSTANCE == file.fileType) {
+//                                if (PsiTreeUtil.findChildrenOfType(file, PsiAnnotation::class.java)
+//                                        .any(DgsDataFetcher.Companion::isDataFetcherAnnotation)
+//                                ) {
+//                                    cachedComponentIndex = null
+//                                }
+//                            }
+//                        }
+//                    }, 2000)
+//                }
+//
+//                override fun childrenChanged(event: PsiTreeChangeEvent) {
+//                    event.file?.let { updateDocument(it) }
+//                }
+//
+//                override fun dispose() {
+//                    myDocumentAlarm.cancelAllRequests()
+//                    myDocumentAlarm.dispose()
+//                }
+//            }
+//            , this)
 
             dgsComponentIndex
 
