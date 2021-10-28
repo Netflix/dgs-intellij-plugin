@@ -22,12 +22,18 @@ import com.intellij.lang.jsgraphql.schema.GraphQLSchemaEventListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.newvfs.BulkFileListener
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.messages.Topic
 import com.netflix.dgs.plugin.DgsDataFetcher
 import org.jetbrains.kotlin.idea.extensions.gradle.getTopLevelBuildScriptPsiFile
+import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
+
 
 interface DgsService {
     fun getDgsComponentIndex(): DgsComponentIndex
@@ -71,6 +77,26 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
                 GraphQLSchemaEventListener {
                     cachedComponentIndex = null
                 })
+
+//            PsiManager.getInstance(project).addPsiTreeChangeListener(object: PsiTreeChangeAdapter() {
+//                override fun childrenChanged(event: PsiTreeChangeEvent) {
+//                    println(event.child)
+//                }
+//            }, this)
+
+            project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
+                override fun after(events: MutableList<out VFileEvent>) {
+                    events.forEach {
+                        if(JavaFileType.INSTANCE == it.file?.fileType) {
+                            val psiFile = PsiManager.getInstance(project).findFile(it.file!!)
+                            if(psiFile?.getChildrenOfType<PsiAnnotation>()?.any(DgsDataFetcher.Companion::isDataFetcherAnnotation) == true) {
+                                cachedComponentIndex = null
+                            }
+                        }
+                    }
+                }
+            })
+
 
             dgsComponentIndex
 
