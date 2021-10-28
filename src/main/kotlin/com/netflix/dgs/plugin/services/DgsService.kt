@@ -21,6 +21,8 @@ import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaEventListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.editor.event.BulkAwareDocumentListener
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -29,9 +31,12 @@ import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.messages.Topic
 import com.netflix.dgs.plugin.DgsDataFetcher
+import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.extensions.gradle.getTopLevelBuildScriptPsiFile
+import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
 import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 
 
@@ -78,25 +83,27 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
                     cachedComponentIndex = null
                 })
 
-//            PsiManager.getInstance(project).addPsiTreeChangeListener(object: PsiTreeChangeAdapter() {
-//                override fun childrenChanged(event: PsiTreeChangeEvent) {
-//                    println(event.child)
-//                }
-//            }, this)
-
             project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
                 override fun after(events: MutableList<out VFileEvent>) {
-                    events.forEach {
-                        if(JavaFileType.INSTANCE == it.file?.fileType) {
+                    //Shortcut if cache was already invalidated
+                    if(cachedComponentIndex == null) {
+                        return
+                    }
+
+                    events.takeWhile {
+                        if(JavaFileType.INSTANCE == it.file?.fileType || KotlinFileType.INSTANCE == it.file?.fileType) {
                             val psiFile = PsiManager.getInstance(project).findFile(it.file!!)
-                            if(psiFile?.getChildrenOfType<PsiAnnotation>()?.any(DgsDataFetcher.Companion::isDataFetcherAnnotation) == true) {
+
+                            if(PsiTreeUtil.findChildrenOfType(psiFile, PsiAnnotation::class.java).any(DgsDataFetcher.Companion::isDataFetcherAnnotation)) {
                                 cachedComponentIndex = null
+                                return@takeWhile false
                             }
                         }
+
+                        true
                     }
                 }
             })
-
 
             dgsComponentIndex
 
