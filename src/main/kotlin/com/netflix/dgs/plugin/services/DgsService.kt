@@ -17,11 +17,15 @@
 package com.netflix.dgs.plugin.services
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener
+import com.intellij.lang.jsgraphql.schema.GraphQLSchemaEventListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.util.messages.Topic
 import com.netflix.dgs.plugin.DgsDataFetcher
 import org.jetbrains.kotlin.idea.extensions.gradle.getTopLevelBuildScriptPsiFile
 
@@ -29,11 +33,11 @@ interface DgsService {
     fun getDgsComponentIndex(): DgsComponentIndex
 }
 
-class DgsServiceImpl(private val project: Project) : DgsService {
+class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
     private var cachedComponentIndex: DgsComponentIndex? = null
 
     override fun getDgsComponentIndex(): DgsComponentIndex {
-        return if(cachedComponentIndex != null) {
+        return if (cachedComponentIndex != null) {
             cachedComponentIndex!!
         } else {
             val dgsComponentIndex = DgsComponentIndex()
@@ -59,8 +63,22 @@ class DgsServiceImpl(private val project: Project) : DgsService {
             )
 
             cachedComponentIndex = dgsComponentIndex
+
+            val topic: Topic<GraphQLSchemaEventListener> =
+                GraphQLSchemaChangeListener.TOPIC as Topic<GraphQLSchemaEventListener>
+            project.messageBus.connect(this).subscribe(
+                topic,
+                GraphQLSchemaEventListener {
+                    cachedComponentIndex = null
+                })
+
             dgsComponentIndex
+
         }
+    }
+
+    override fun dispose() {
+
     }
 }
 
