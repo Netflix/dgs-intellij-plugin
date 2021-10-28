@@ -31,6 +31,7 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.messages.Topic
 import com.netflix.dgs.plugin.DgsDataFetcher
+import com.netflix.dgs.plugin.DgsEntityFetcher
 import org.jetbrains.kotlin.idea.extensions.gradle.getTopLevelBuildScriptPsiFile
 import org.jetbrains.kotlin.psi.psiUtil.getChildrenOfType
 
@@ -108,4 +109,4 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
     }
 }
 
-data class DgsComponentIndex(val dataFetchers: MutableSet<DgsDataFetcher> = mutableSetOf())
+data class DgsComponentIndex(val dataFetchers: MutableSet<DgsDataFetcher> = mutableSetOf(), val entityFetchers: MutableSet<DgsEntityFetcher> = mutableSetOf())

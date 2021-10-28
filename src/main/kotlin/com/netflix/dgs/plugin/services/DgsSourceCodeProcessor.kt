@@ -23,6 +23,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.Processor
 import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.DgsDataFetcher
+import com.netflix.dgs.plugin.DgsEntityFetcher
 
 class DgsSourceCodeProcessor(
     private val dgsComponentIndex: DgsComponentIndex,
@@ -45,6 +46,21 @@ class DgsSourceCodeProcessor(
 
             }
             .forEach(dgsComponentIndex.dataFetchers::add)
+
+        PsiTreeUtil.findChildrenOfType(file, PsiMethod::class.java)
+            .filter(DgsEntityFetcher.Companion::isEntityFetcherMethod)
+            .map { method ->
+                val parentType = DgsEntityFetcher.getParentType(method)
+
+                val fieldName = DgsEntityFetcher.getField(method)
+                val graphQLType = typeDefinitionRegistry.objectTypeExtensions()[fieldName]?.get(0)
+                    ?: typeDefinitionRegistry.getType(fieldName, ObjectTypeDefinition::class.java)
+                        .orNull()
+                val schemaPsi = graphQLType?.sourceLocation?.element
+
+                DgsEntityFetcher(parentType, fieldName, method, DgsEntityFetcher.getEntityFetcherAnnotation(method), file, schemaPsi)
+            }
+            .forEach(dgsComponentIndex.entityFetchers::add)
 
 
         return true
