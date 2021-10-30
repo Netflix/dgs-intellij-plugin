@@ -17,6 +17,7 @@
 package com.netflix.dgs.plugin.services
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaEventListener
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
@@ -27,6 +28,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
@@ -36,6 +38,8 @@ import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.DgsEntityFetcher
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.extensions.gradle.getTopLevelBuildScriptPsiFile
+import org.jetbrains.kotlin.idea.refactoring.isInjectedFragment
+import org.jetbrains.kotlin.idea.search.fileScope
 
 
 interface DgsService {
@@ -93,7 +97,9 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
                             val psiFile = PsiManager.getInstance(project).findFile(it.file!!)
 
                             if(PsiTreeUtil.findChildrenOfType(psiFile, PsiAnnotation::class.java).any(DgsDataFetcher.Companion::isDataFetcherAnnotation)) {
-                                cachedComponentIndex = null
+                                cachedComponentIndex?.fileUpdated(psiFile!!)
+                                processor.process(psiFile!!)
+
                                 EditorFactory.getInstance().refreshAllEditors()
                                 return@takeWhile false
                             }
@@ -145,4 +151,9 @@ class DgsServiceImpl(private val project: Project) : DgsService, Disposable {
     }
 }
 
-data class DgsComponentIndex(val dataFetchers: MutableSet<DgsDataFetcher> = mutableSetOf(), val entityFetchers: MutableSet<DgsEntityFetcher> = mutableSetOf())
+data class DgsComponentIndex(val dataFetchers: MutableSet<DgsDataFetcher> = mutableSetOf(), val entityFetchers: MutableSet<DgsEntityFetcher> = mutableSetOf()) {
+
+    fun fileUpdated(file: PsiFile) {
+        dataFetchers.removeAll { it.psiFile == file }
+    }
+}
