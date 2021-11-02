@@ -21,6 +21,7 @@ import com.intellij.lang.jsgraphql.psi.GraphQLDirective
 import com.intellij.lang.jsgraphql.psi.GraphQLIdentifier
 import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeDefinition
 import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeExtensionDefinition
+import com.intellij.lang.jsgraphql.psi.impl.GraphQLDirectiveImpl
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
@@ -55,7 +56,7 @@ class DgsEntityFetcherInspector : LocalInspectionTool() {
                             "dgs.inspection.missing.entityfetcher.annotation"
                         )
                         holder.registerProblem(
-                            element,
+                            (directives[0] as GraphQLDirectiveImpl).navigationElement,
                             message,
                             ProblemHighlightType.WARNING,
                             DgsEntityFetcherFix()

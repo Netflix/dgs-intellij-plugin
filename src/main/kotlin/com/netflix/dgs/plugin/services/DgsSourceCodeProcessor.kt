@@ -30,8 +30,9 @@ class DgsSourceCodeProcessor(
     private val typeDefinitionRegistry: TypeDefinitionRegistry
 ) : Processor<PsiFile> {
     override fun process(file: PsiFile): Boolean {
-        PsiTreeUtil.findChildrenOfType(file, PsiMethod::class.java)
-            .filter(DgsDataFetcher.Companion::isDataFetcherMethod)
+        val children = PsiTreeUtil.findChildrenOfType(file, PsiMethod::class.java)
+        children
+            .filter(DgsDataFetcher.Companion::isDataFetcherMethod )
             .map { method ->
                 val parentType = DgsDataFetcher.getParentType(method)
                 val graphQLType = typeDefinitionRegistry.objectTypeExtensions()[parentType]?.get(0)
@@ -47,7 +48,7 @@ class DgsSourceCodeProcessor(
             }
             .forEach(dgsComponentIndex.dataFetchers::add)
 
-        PsiTreeUtil.findChildrenOfType(file, PsiMethod::class.java)
+        children
             .filter(DgsEntityFetcher.Companion::isEntityFetcherMethod)
             .map { method ->
                 val parentType = DgsEntityFetcher.getParentType(method)
