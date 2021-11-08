@@ -22,6 +22,9 @@ import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiIdentifier
+import com.intellij.psi.PsiManager
+import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.services.DgsService
 
@@ -35,15 +38,21 @@ class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
             if (DgsDataFetcher.isDataFetcherAnnotation(element)) {
 
                 val dgsService = element.project.getService(DgsService::class.java)
-                val dgsDataFetcher = dgsService.getDgsComponentIndex().dataFetchers.find { it.psiAnnotation == element }
+                val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation == element }
 
                 if (dgsDataFetcher?.schemaPsi != null) {
+
+                    val psiIdentifier = PsiTreeUtil.findChildOfType(element, PsiIdentifier::class.java)
+
+                    if (psiIdentifier != null) {
                         val builder =
                             NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
                                 .setTargets(dgsDataFetcher.schemaPsi)
-                                .setTooltipText("Navigate to GraphQL schema type").createLineMarkerInfo(element)
+                                .setTooltipText("Navigate to GraphQL schema type")
+                                .createLineMarkerInfo(psiIdentifier)
 
                         result.add(builder)
+                    }
                 }
             }
 

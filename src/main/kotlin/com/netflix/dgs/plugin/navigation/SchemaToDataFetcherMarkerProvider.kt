@@ -22,24 +22,32 @@ import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.lang.jsgraphql.psi.GraphQLFieldDefinition
 import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiIdentifier
+import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.services.DgsService
 
-class SchemaToDataFetcherMarkerProvider: RelatedItemLineMarkerProvider() {
+class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
     override fun collectNavigationMarkers(
         element: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
     ) {
         val dgsService = element.project.getService(DgsService::class.java)
 
-        if(element is GraphQLFieldDefinition) {
+        if (element is GraphQLFieldDefinition) {
             val dataFetcher = dgsService.getDgsComponentIndex().dataFetchers.find { it.schemaPsi == element }
 
-            if(dataFetcher != null) {
-                val builder = NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
-                    .setTargets(dataFetcher.psiAnnotation)
-                    .setTooltipText("Navigate to DGS data fetcher").createLineMarkerInfo(element)
+            if (dataFetcher != null) {
+                val psiIdentifier = PsiTreeUtil.findChildOfType(element, PsiIdentifier::class.java)
 
-                result.add(builder)
+                if (psiIdentifier != null) {
+
+                    val builder =
+                        NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
+                            .setTargets(dataFetcher.psiAnnotation)
+                            .setTooltipText("Navigate to DGS data fetcher").createLineMarkerInfo(psiIdentifier)
+
+                    result.add(builder)
+                }
             }
         }
     }
