@@ -29,11 +29,14 @@ import com.intellij.psi.util.findParentOfType
 import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.services.DgsService
+import com.netflix.dgs.plugin.services.DgsSourceCodeProcessor
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.evaluateString
 import org.jetbrains.uast.toUElement
+import com.intellij.openapi.diagnostic.Logger
 
 class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
+    private val LOG: Logger = Logger.getInstance(DataFetcherToSchemaMarkerProvider::class.java)
     override fun collectNavigationMarkers(
         element: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
@@ -41,11 +44,13 @@ class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
         if (element is PsiAnnotation) {
 
             if (DgsDataFetcher.isDataFetcherAnnotation(element)) {
-
+                LOG.info("GRAPHQL::processing marker for element $element")
                 val dgsService = element.project.getService(DgsService::class.java)
-                val dgsDataFetcher = dgsService.getDgsComponentIndex().dataFetchers.find { it.psiAnnotation == element }
+                val index = dgsService.getDgsComponentIndex();
+                val dgsDataFetcher = index.dataFetchers.find { it.psiAnnotation == element }
 
                 if (dgsDataFetcher?.schemaPsi != null) {
+                    LOG.info("GRAPHQL::adding icon for element $element")
                         val builder =
                             NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
                                 .setTargets(dgsDataFetcher.schemaPsi)

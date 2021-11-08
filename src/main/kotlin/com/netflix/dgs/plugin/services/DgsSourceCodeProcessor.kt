@@ -16,6 +16,7 @@
 
 package com.netflix.dgs.plugin.services
 
+import com.intellij.lang.jsgraphql.ide.editor.GraphQLIntrospectionResultToSchema
 import com.intellij.lang.jsgraphql.types.language.ObjectTypeDefinition
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry
 import com.intellij.psi.*
@@ -24,11 +25,14 @@ import com.intellij.util.Processor
 import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.DgsEntityFetcher
+import com.intellij.openapi.diagnostic.Logger
 
 class DgsSourceCodeProcessor(
     private val dgsComponentIndex: DgsComponentIndex,
     private val typeDefinitionRegistry: TypeDefinitionRegistry
 ) : Processor<PsiFile> {
+    private val LOG: Logger = Logger.getInstance(DgsSourceCodeProcessor::class.java)
+
     override fun process(file: PsiFile): Boolean {
         val children = PsiTreeUtil.findChildrenOfType(file, PsiMethod::class.java)
         children
@@ -43,6 +47,7 @@ class DgsSourceCodeProcessor(
                 val fieldDefinition = graphQLType?.fieldDefinitions?.find { it.name == fieldName }
                 val schemaPsi = fieldDefinition?.sourceLocation?.element
 
+                LOG.info("GRAPHQL::Processing field element ${fieldName}")
                 DgsDataFetcher(parentType, fieldName, method, DgsDataFetcher.getDataFetcherAnnotation(method), file, schemaPsi)
 
             }
