@@ -90,7 +90,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             project.getMessageBus().connect(this).subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
                 @Override
                 public void after(@NotNull List<? extends VFileEvent> events) {
-                    events.stream().takeWhile(event -> {
+                    events.stream().forEach(event -> {
                         if(JavaFileType.INSTANCE == event.getFile().getFileType() || KotlinFileType.INSTANCE ==event.getFile().getFileType()) {
                             var psiFile = PsiManager.getInstance(project).findFile(event.getFile());
 
