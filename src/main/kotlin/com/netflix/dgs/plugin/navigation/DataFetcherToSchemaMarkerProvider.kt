@@ -19,19 +19,11 @@ package com.netflix.dgs.plugin.navigation
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
-import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
-import com.intellij.lang.jsgraphql.types.language.ObjectTypeDefinition
 import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.util.findParentOfType
-import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.services.DgsService
-import org.jetbrains.uast.UAnnotation
-import org.jetbrains.uast.evaluateString
-import org.jetbrains.uast.toUElement
 
 class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
     override fun collectNavigationMarkers(
