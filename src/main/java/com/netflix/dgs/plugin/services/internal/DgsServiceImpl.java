@@ -16,15 +16,17 @@
 
 package com.netflix.dgs.plugin.services.internal;
 
+import com.intellij.AppTopics;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener;
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.openapi.vfs.newvfs.BulkFileListener;
-import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
@@ -36,8 +38,6 @@ import com.netflix.dgs.plugin.services.DgsService;
 import com.netflix.dgs.plugin.services.DgsSourceCodeProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.KotlinFileType;
-
-import java.util.List;
 
 public class DgsServiceImpl implements DgsService, Disposable {
 
@@ -87,23 +87,22 @@ public class DgsServiceImpl implements DgsService, Disposable {
                     version -> cachedComponentIndex = null
             );
 
-            project.getMessageBus().connect(this).subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
+            project.getMessageBus().connect(this).subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
                 @Override
-                public void after(@NotNull List<? extends VFileEvent> events) {
-                    events.stream().forEach(event -> {
-                        if(JavaFileType.INSTANCE == event.getFile().getFileType() || KotlinFileType.INSTANCE ==event.getFile().getFileType()) {
-                            var psiFile = PsiManager.getInstance(project).findFile(event.getFile());
+                public void beforeDocumentSaving(@NotNull Document document) {
+                    var file = FileDocumentManager.getInstance().getFile(document);
 
-
-
-                            if(PsiTreeUtil.findChildrenOfType(psiFile, PsiAnnotation.class).stream().anyMatch(annotation -> DgsDataFetcher.Companion.isDataFetcherAnnotation(annotation))) {
+                    if(JavaFileType.INSTANCE ==  file.getFileType() || KotlinFileType.INSTANCE == file.getFileType()) {
+                        var psiFile = PsiManager.getInstance(project).findFile(file);
+                        ApplicationManager.getApplication().runReadAction( () -> {
+                            if (PsiTreeUtil.findChildrenOfType(psiFile, PsiAnnotation.class).stream().anyMatch(annotation ->  DgsDataFetcher.Companion.isDataFetcherAnnotation(annotation))) {
                                 cachedComponentIndex.fileUpdated(psiFile);
                                 processor.process(psiFile);
 
                                 EditorFactory.getInstance().refreshAllEditors();
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             });
 
