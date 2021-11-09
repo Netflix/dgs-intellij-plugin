@@ -42,5 +42,6 @@
         <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.SchemaToDataFetcherMarkerProvider"/>
 
         <projectService serviceInterface="com.netflix.dgs.plugin.services.DgsService" serviceImplementation="com.netflix.dgs.plugin.services.internal.DgsServiceImpl"/>
+        <projectService serviceImplementation="com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry"/>
     </extensions>
 </idea-plugin>

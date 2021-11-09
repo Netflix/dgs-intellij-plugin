@@ -37,17 +37,13 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
             val dataFetcher = dgsService.getDgsComponentIndex().dataFetchers.find { it.schemaPsi == element }
 
             if (dataFetcher != null) {
-                val psiIdentifier = PsiTreeUtil.findChildOfType(element, PsiIdentifier::class.java)
+                val builder =
+                    NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
+                        .setTargets(dataFetcher.psiAnnotation)
+                        .setTooltipText("Navigate to DGS data fetcher")
+                        .createLineMarkerInfo(element)
 
-                if (psiIdentifier != null) {
-
-                    val builder =
-                        NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
-                            .setTargets(dataFetcher.psiAnnotation)
-                            .setTooltipText("Navigate to DGS data fetcher").createLineMarkerInfo(psiIdentifier)
-
-                    result.add(builder)
-                }
+                result.add(builder)
             }
         }
     }

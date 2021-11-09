@@ -17,32 +17,33 @@
 package com.netflix.dgs.plugin.services.internal;
 
 import com.intellij.AppTopics;
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener;
-import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.search.FileTypeIndex;
+import com.intellij.psi.impl.java.stubs.index.JavaStubIndexKeys;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.netflix.dgs.plugin.DgsDataFetcher;
+import com.intellij.psi.stubs.StubIndex;
 import com.netflix.dgs.plugin.services.DgsComponentIndex;
+import com.netflix.dgs.plugin.services.DgsDataProcessor;
 import com.netflix.dgs.plugin.services.DgsService;
-import com.netflix.dgs.plugin.services.DgsSourceCodeProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.KotlinFileType;
+
+import java.util.Set;
 
 public class DgsServiceImpl implements DgsService, Disposable {
 
     private final Project project;
+    private final Set<String> dataFetcherAnnotations = Set.of(
+            "DgsQuery",
+            "DgsMutation",
+            "DgsSubscription",
+            "DgsData");
     private DgsComponentIndex cachedComponentIndex;
 
     public DgsServiceImpl(Project project) {
@@ -56,29 +57,15 @@ public class DgsServiceImpl implements DgsService, Disposable {
             return cachedComponentIndex;
         } else {
             DgsComponentIndex dgsComponentIndex = new DgsComponentIndex();
-            var psiManager = PsiManager.getInstance(project);
-            var projectPsiFile = PsiManager.getInstance(project).findFile(project.getProjectFile());
+            var processor = new DgsDataProcessor(project.getService(GraphQLSchemaRegistry.class), dgsComponentIndex);
+            StubIndex stubIndex = StubIndex.getInstance();
 
-            var typeDefinitionRegistry =
-                    GraphQLSchemaProvider.getInstance(project)
-                            .getRegistryInfo(projectPsiFile).getTypeDefinitionRegistry();
-
-            var processor = new DgsSourceCodeProcessor(dgsComponentIndex, typeDefinitionRegistry);
-
-            FileTypeIndex.processFiles(
-                    JavaFileType.INSTANCE,
-                    file -> {
-                        var psiFile = psiManager.findFile(file);
-                        if (psiFile != null) {
-                            processor.process(psiFile);
-                        }
-                        return true;
-                    },
-                    GlobalSearchScope.getScopeRestrictedByFileTypes(
-                            GlobalSearchScope.projectScope(project),
-                            JavaFileType.INSTANCE
-                    )
-            );
+            dataFetcherAnnotations.forEach(dataFetcherAnnotation -> {
+                stubIndex.processElements(JavaStubIndexKeys.ANNOTATIONS, dataFetcherAnnotation, project, GlobalSearchScope.projectScope(project), PsiAnnotation.class, annotation -> {
+                    processor.process(annotation);
+                    return true;
+                });
+            });
 
             cachedComponentIndex = dgsComponentIndex;
 
@@ -93,16 +80,8 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 public void beforeDocumentSaving(@NotNull Document document) {
                     var file = FileDocumentManager.getInstance().getFile(document);
 
-                    if(JavaFileType.INSTANCE ==  file.getFileType() || KotlinFileType.INSTANCE == file.getFileType()) {
-                        var psiFile = PsiManager.getInstance(project).findFile(file);
-                        ApplicationManager.getApplication().runReadAction( () -> {
-                            if (PsiTreeUtil.findChildrenOfType(psiFile, PsiAnnotation.class).stream().anyMatch(annotation ->  DgsDataFetcher.Companion.isDataFetcherAnnotation(annotation))) {
-                                cachedComponentIndex.fileUpdated(psiFile);
-                                processor.process(psiFile);
-
-                                DaemonCodeAnalyzer.getInstance(project).restart(psiFile);
-                            }
-                        });
+                    if (JavaFileType.INSTANCE == file.getFileType() || KotlinFileType.INSTANCE == file.getFileType()) {
+                        cachedComponentIndex = null;
                     }
                 }
             });
