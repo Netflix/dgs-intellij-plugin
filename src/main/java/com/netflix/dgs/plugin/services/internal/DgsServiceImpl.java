@@ -17,6 +17,7 @@
 package com.netflix.dgs.plugin.services.internal;
 
 import com.intellij.AppTopics;
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener;
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
@@ -99,7 +100,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
                                 cachedComponentIndex.fileUpdated(psiFile);
                                 processor.process(psiFile);
 
-                                EditorFactory.getInstance().refreshAllEditors();
+                                DaemonCodeAnalyzer.getInstance(project).restart(psiFile);
                             }
                         });
                     }
