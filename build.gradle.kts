@@ -32,6 +32,7 @@ plugins {
     id("org.jetbrains.qodana") version "0.1.12"
 }
 
+
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
