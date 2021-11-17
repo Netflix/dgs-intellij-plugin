@@ -31,16 +31,20 @@ class DgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry,
 
             val parentType = DgsDataFetcher.getParentType(psiMethod)
             val field = DgsDataFetcher.getField(psiMethod)
-            val dgsDataFetcher = DgsDataFetcher(
-                parentType,
-                field,
-                psiMethod,
-                psiAnnotation,
-                psiAnnotation.containingFile,
-                graphQLSchemaRegistry.psiForSchemaType(parentType, field).orNull()
-            )
 
-            dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+            //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
+            if(parentType != null) {
+                val dgsDataFetcher = DgsDataFetcher(
+                    parentType,
+                    field,
+                    psiMethod,
+                    psiAnnotation,
+                    psiAnnotation.containingFile,
+                    graphQLSchemaRegistry.psiForSchemaType(parentType, field).orNull()
+                )
+
+                dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+            }
         }
 
         return true

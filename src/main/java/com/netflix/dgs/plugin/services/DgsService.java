@@ -18,4 +18,6 @@ package com.netflix.dgs.plugin.services;
 
 public interface DgsService {
     DgsComponentIndex getDgsComponentIndex();
+
+    void clearCache();
 }

@@ -20,40 +20,51 @@ import com.intellij.codeInspection.*
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.tree.TreeElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.uast.UastVisitorAdapter
 import com.netflix.dgs.plugin.MyBundle
+import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.idea.util.addAnnotation
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.uast.*
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
+import kotlin.system.measureTimeMillis
 
 class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
 
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
             override fun visitMethod(node: UMethod): Boolean {
-                if (node.hasAnnotation(DGS_DATA_ANNOTATION)) {
-                    val dgsDataAnnotation = node.getAnnotation(DGS_DATA_ANNOTATION)
-                    val parentTypeValue =
-                        (dgsDataAnnotation?.findAttribute("parentType")?.attributeValue as JvmAnnotationConstantValue).constantValue
-                    if (parentTypeValue == "Query" || parentTypeValue == "Mutation" || parentTypeValue == "Subscription") {
-                        val message = MyBundle.getMessage(
-                            "dgs.inspection.dgsdata.simplify",
-                            parentTypeValue,
-                            "@Dgs${parentTypeValue}"
-                        )
-                        holder.registerProblem(
-                            dgsDataAnnotation.toUElement()?.sourcePsi!!,
-                            message,
-                            ProblemHighlightType.WEAK_WARNING,
-                            DgsDataQuickFix("@Dgs${parentTypeValue}", message)
-                        )
+                val time = measureTimeMillis {
+
+                    if (node.hasAnnotation(DGS_DATA_ANNOTATION)) {
+                        val dgsDataAnnotation = node.getAnnotation(DGS_DATA_ANNOTATION)
+                        val parentTypeAttribute = dgsDataAnnotation?.findAttribute("parentType")
+                        val parentTypeValue =
+                            if (parentTypeAttribute != null && parentTypeAttribute.attributeValue != null) {
+                                (parentTypeAttribute.attributeValue as JvmAnnotationConstantValue).constantValue
+                            } else null
+
+                        if (parentTypeValue == "Query" || parentTypeValue == "Mutation" || parentTypeValue == "Subscription") {
+                            val message = MyBundle.getMessage(
+                                "dgs.inspection.dgsdata.simplify",
+                                parentTypeValue,
+                                "@Dgs${parentTypeValue}"
+                            )
+                            holder.registerProblem(
+                                dgsDataAnnotation.toUElement()?.sourcePsi!!,
+                                message,
+                                ProblemHighlightType.WEAK_WARNING,
+                                DgsDataQuickFix("@Dgs${parentTypeValue}", message)
+                            )
+                        }
                     }
                 }
 
+                println("DgsDataSimplifyingInspector took $time ms")
                 return super.visitMethod(node)
             }
         }, false)
@@ -93,7 +104,9 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     factory.createAnnotationFromText(newAnnotation, null)
                 }
 
-                method?.sourcePsi?.addBefore(newAnnotation, descriptor.psiElement)
+                method?.sourcePsi?.addBefore(newAnnotation, method.modifierList)
+
+                project.getService(DgsService::class.java).clearCache()
             } else if(file is KtFile) {
                     if(fieldValue != null && fieldValue != method?.name) {
                         (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN), "field = \"${fieldValue}\"")

@@ -40,18 +40,17 @@ data class DgsDataFetcher(val parentType: String, val field: String, val psiMeth
             return method.annotations.any { isDataFetcherAnnotation(it) }
         }
 
-        fun getParentType(annotation: PsiAnnotation): String {
+        fun getParentType(annotation: PsiAnnotation): String? {
             return when (annotation.qualifiedName) {
                 "com.netflix.graphql.dgs.DgsQuery" -> "Query"
                 "com.netflix.graphql.dgs.DgsMutation" -> "Mutation"
                 "com.netflix.graphql.dgs.DgsSubscription" -> "Subscription"
-                "com.netflix.graphql.dgs.DgsData" -> (annotation.toUElement() as UAnnotation).findAttributeValue("parentType")
-                    ?.evaluateString()?:throw IllegalArgumentException("DgsData annotation doesn't have a parentType value")
+                "com.netflix.graphql.dgs.DgsData" -> (annotation.toUElement() as UAnnotation).findAttributeValue("parentType")?.evaluateString()
                 else -> throw IllegalArgumentException("Annotation ${annotation.qualifiedName} is not a data fetcher annotation")
             }
         }
 
-        fun getParentType(method: PsiMethod): String {
+        fun getParentType(method: PsiMethod): String? {
             val annotation = getDataFetcherAnnotation(method)
             return getParentType(annotation)
         }

@@ -17,6 +17,7 @@
 package com.netflix.dgs.plugin.services.internal;
 
 import com.intellij.AppTopics;
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaChangeListener;
 import com.intellij.openapi.Disposable;
@@ -25,6 +26,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileDocumentManagerListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.java.stubs.index.JavaStubIndexKeys;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
@@ -37,57 +39,71 @@ import org.jetbrains.kotlin.idea.KotlinFileType;
 import java.util.Set;
 
 public class DgsServiceImpl implements DgsService, Disposable {
-
     private final Project project;
     private final Set<String> dataFetcherAnnotations = Set.of(
             "DgsQuery",
             "DgsMutation",
             "DgsSubscription",
             "DgsData");
-    private DgsComponentIndex cachedComponentIndex;
+    private volatile DgsComponentIndex cachedComponentIndex;
 
     public DgsServiceImpl(Project project) {
         this.project = project;
+
+        var topic = GraphQLSchemaChangeListener.TOPIC;
+        project.getMessageBus().connect(this).subscribe(
+                topic,
+                version -> {
+                    cachedComponentIndex = null;
+                    DaemonCodeAnalyzer.getInstance(project).restart();
+                }
+        );
+
+
+        project.getMessageBus().connect(this).subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
+            @Override
+            public void beforeDocumentSaving(@NotNull Document document) {
+                var file = FileDocumentManager.getInstance().getFile(document);
+
+                if (JavaFileType.INSTANCE == file.getFileType() || KotlinFileType.INSTANCE == file.getFileType()) {
+                    System.out.println("Clearing component cache");
+                    cachedComponentIndex = null;
+
+                    DaemonCodeAnalyzer.getInstance(project).restart(PsiManager.getInstance(project).findFile(file));
+                }
+            }
+        });
     }
 
     @Override
     public DgsComponentIndex getDgsComponentIndex() {
-
         if (cachedComponentIndex != null) {
-            return cachedComponentIndex;
+                return cachedComponentIndex;
         } else {
-            DgsComponentIndex dgsComponentIndex = new DgsComponentIndex();
-            var processor = new DgsDataProcessor(project.getService(GraphQLSchemaRegistry.class), dgsComponentIndex);
-            StubIndex stubIndex = StubIndex.getInstance();
+                long startTime = System.currentTimeMillis();
+                DgsComponentIndex dgsComponentIndex = new DgsComponentIndex();
+                var processor = new DgsDataProcessor(project.getService(GraphQLSchemaRegistry.class), dgsComponentIndex);
+                StubIndex stubIndex = StubIndex.getInstance();
 
-            dataFetcherAnnotations.forEach(dataFetcherAnnotation -> {
-                stubIndex.processElements(JavaStubIndexKeys.ANNOTATIONS, dataFetcherAnnotation, project, GlobalSearchScope.projectScope(project), PsiAnnotation.class, annotation -> {
-                    processor.process(annotation);
-                    return true;
+                dataFetcherAnnotations.forEach(dataFetcherAnnotation -> {
+                    stubIndex.processElements(JavaStubIndexKeys.ANNOTATIONS, dataFetcherAnnotation, project, GlobalSearchScope.projectScope(project), PsiAnnotation.class, annotation -> {
+                        processor.process(annotation);
+                        return true;
+                    });
                 });
-            });
 
-            cachedComponentIndex = dgsComponentIndex;
+                cachedComponentIndex = dgsComponentIndex;
 
-            var topic = GraphQLSchemaChangeListener.TOPIC;
-            project.getMessageBus().connect(this).subscribe(
-                    topic,
-                    version -> cachedComponentIndex = null
-            );
+                long totalTime = System.currentTimeMillis() - startTime;
+                System.out.println("DGS indexing took " + totalTime + " ms");
 
-            project.getMessageBus().connect(this).subscribe(AppTopics.FILE_DOCUMENT_SYNC, new FileDocumentManagerListener() {
-                @Override
-                public void beforeDocumentSaving(@NotNull Document document) {
-                    var file = FileDocumentManager.getInstance().getFile(document);
-
-                    if (JavaFileType.INSTANCE == file.getFileType() || KotlinFileType.INSTANCE == file.getFileType()) {
-                        cachedComponentIndex = null;
-                    }
-                }
-            });
-
-            return dgsComponentIndex;
+                return dgsComponentIndex;
         }
+    }
+
+    @Override
+    public void clearCache() {
+        cachedComponentIndex = null;
     }
 
     @Override

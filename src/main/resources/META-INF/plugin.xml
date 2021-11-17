@@ -43,5 +43,8 @@
 
         <projectService serviceInterface="com.netflix.dgs.plugin.services.DgsService" serviceImplementation="com.netflix.dgs.plugin.services.internal.DgsServiceImpl"/>
         <projectService serviceImplementation="com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry"/>
+        <dependencySupport coordinate="com.netflix.graphql.dgs:graphql-dgs" kind="java" displayName="DGS"/>
     </extensions>
+
+
 </idea-plugin>
