@@ -33,8 +33,8 @@ class DgsDataSimplifyingInspectorTest: DgsTestCase() {
         myFixture.configureByFile("UsingDgsDataForQuery.java")
         myFixture.enableInspections(DgsDataSimplifyingInspector::class.java)
         myFixture.checkHighlighting(false, false, true, true)
-//        myFixture.launchAction(myFixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
-//        myFixture.checkResultByFile("FixedDgsDataForQuery.java")
+        myFixture.launchAction(myFixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
+        myFixture.checkResultByFile("FixedDgsDataForQuery.java")
     }
 
 

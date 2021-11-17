@@ -23,7 +23,8 @@ import com.intellij.lang.jsgraphql.types.language.ObjectTypeExtensionDefinition;
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiManager;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +37,8 @@ public class GraphQLSchemaRegistry {
         this.project = project;
     }
 
-    public Optional<PsiElement> psiForSchemaType(String parentType, String field) {
-        TypeDefinitionRegistry registry = getRegistry();
+    public @Nullable Optional<PsiElement> psiForSchemaType(@NotNull PsiElement psiElement, @Nullable String parentType, @Nullable String field) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
         List<ObjectTypeExtensionDefinition> objectTypeExtensionDefinitions = registry.objectTypeExtensions().get(parentType);
 
         ObjectTypeDefinition type = null;
@@ -60,10 +61,8 @@ public class GraphQLSchemaRegistry {
         return Optional.empty();
     }
 
-    private TypeDefinitionRegistry getRegistry() {
-        var projectPsiFile = PsiManager.getInstance(project).findFile(project.getProjectFile());
-
+    private TypeDefinitionRegistry getRegistry(@NotNull PsiElement psiElement) {
         return GraphQLSchemaProvider.getInstance(project)
-                .getRegistryInfo(projectPsiFile).getTypeDefinitionRegistry();
+                .getRegistryInfo(psiElement).getTypeDefinitionRegistry();
     }
 }

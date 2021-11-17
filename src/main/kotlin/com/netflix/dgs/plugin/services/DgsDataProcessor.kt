@@ -40,7 +40,7 @@ class DgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry,
                     psiMethod,
                     psiAnnotation,
                     psiAnnotation.containingFile,
-                    graphQLSchemaRegistry.psiForSchemaType(parentType, field).orNull()
+                    graphQLSchemaRegistry.psiForSchemaType(psiMethod, parentType, field)?.orNull()
                 )
 
                 dgsComponentIndex.dataFetchers.add(dgsDataFetcher)

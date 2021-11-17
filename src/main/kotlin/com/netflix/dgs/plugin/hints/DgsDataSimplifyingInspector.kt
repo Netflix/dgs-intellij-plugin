@@ -104,7 +104,9 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     factory.createAnnotationFromText(newAnnotation, null)
                 }
 
-                method?.sourcePsi?.addBefore(newAnnotation, method.modifierList)
+                descriptor.psiElement.replace(newAnnotation)
+//                method?.sourcePsi?.addBefore(newAnnotation, method.modifierList.replace())
+
 
                 project.getService(DgsService::class.java).clearCache()
             } else if(file is KtFile) {
@@ -115,7 +117,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     }
             }
 
-            descriptor.psiElement.delete()
+//            descriptor.psiElement.delete()
         }
 
     }
