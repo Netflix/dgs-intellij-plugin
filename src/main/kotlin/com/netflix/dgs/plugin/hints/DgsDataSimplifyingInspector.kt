@@ -20,7 +20,6 @@ import com.intellij.codeInspection.*
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
-import com.intellij.psi.impl.source.tree.TreeElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.uast.UastVisitorAdapter
 import com.netflix.dgs.plugin.MyBundle
@@ -104,8 +103,8 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     factory.createAnnotationFromText(newAnnotation, null)
                 }
 
-                descriptor.psiElement.replace(newAnnotation)
-//                method?.sourcePsi?.addBefore(newAnnotation, method.modifierList.replace())
+//                descriptor.psiElement.replace(newAnnotation)
+                method?.sourcePsi?.addBefore(newAnnotation, method.modifierList)
 
 
                 project.getService(DgsService::class.java).clearCache()
@@ -117,7 +116,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     }
             }
 
-//            descriptor.psiElement.delete()
+            descriptor.psiElement.delete()
         }
 
     }
