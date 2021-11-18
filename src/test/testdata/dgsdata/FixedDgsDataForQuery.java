@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 public class MissingDgsComponent {
     @DgsQuery
-    public String hello() {
+            public String hello() {
         return "hello";
     }
 }
