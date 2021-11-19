@@ -24,8 +24,15 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.evaluateString
 import org.jetbrains.uast.toUElement
 
-data class DgsEntityFetcher(val parentType: String, val field: String, val psiMethod: PsiMethod, val psiAnnotation: PsiAnnotation, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
+data class DgsEntityFetcher(val name: String, val psiMethod: PsiElement, val psiAnnotation: PsiElement, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
     companion object {
+        fun isEntityFetcherAnnotation(annotation: UAnnotation): Boolean {
+            return when (annotation.qualifiedName) {
+                "com.netflix.graphql.dgs.DgsEntityFetcher" -> true
+                else -> false
+            }
+        }
+
         fun isEntityFetcherAnnotation(annotation: PsiAnnotation): Boolean {
             return when (annotation.qualifiedName) {
                 "com.netflix.graphql.dgs.DgsEntityFetcher" -> true
@@ -33,30 +40,17 @@ data class DgsEntityFetcher(val parentType: String, val field: String, val psiMe
             }
         }
 
-        fun isEntityFetcherMethod(method: PsiMethod): Boolean {
-            return method.annotations.any { isEntityFetcherAnnotation(it) }
-        }
-
-        fun getParentType(annotation: PsiAnnotation): String {
-            return "_entities";
-        }
-
-        fun getParentType(method: PsiMethod): String {
-            val annotation = getEntityFetcherAnnotation(method)
-            return getParentType(annotation)
-        }
-
         fun getEntityFetcherAnnotation(method: PsiMethod) =
             (method.annotations.find { a -> isEntityFetcherAnnotation(a) }
                 ?: throw IllegalArgumentException("Method ${method.name} is not an entity fetcher"))
 
-        fun getField(annotation: PsiAnnotation): String? {
+        fun getNameFromAnnotation(annotation: PsiAnnotation): String? {
             return (annotation.toUElement() as UAnnotation).findAttributeValue("name")?.evaluateString()
         }
 
-        fun getField(method: PsiMethod): String {
+        fun getName(method: PsiMethod): String {
             val entityFetcherAnnotation = getEntityFetcherAnnotation(method)
-            return getField(entityFetcherAnnotation)?:method.name
+            return getNameFromAnnotation(entityFetcherAnnotation)?:method.name
         }
     }
 }

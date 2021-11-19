@@ -65,13 +65,13 @@ data class DgsDataFetcher(val parentType: String, val field: String, val psiMeth
             (method.annotations.find { a -> isDataFetcherAnnotation(a) }
                 ?: throw IllegalArgumentException("Method ${method.name} is not a data fetcher"))
 
-        fun getField(annotation: PsiAnnotation): String? {
+        fun getFieldFromAnnotation(annotation: PsiAnnotation): String? {
             return (annotation.toUElement() as UAnnotation).findAttributeValue("field")?.evaluateString()
         }
 
         fun getField(method: PsiMethod): String {
             val dataFetcherAnnotation = getDataFetcherAnnotation(method)
-            return getField(dataFetcherAnnotation)?:method.name
+            return getFieldFromAnnotation(dataFetcherAnnotation)?:method.name
         }
     }
 }

@@ -25,39 +25,42 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getParentOfType
 
-class UDgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry, private val dgsComponentIndex: DgsComponentIndex) : Processor<UAnnotation> {
+class UDgsDataProcessor(
+    private val graphQLSchemaRegistry: GraphQLSchemaRegistry,
+    private val dgsComponentIndex: DgsComponentIndex
+) : Processor<UAnnotation> {
     override fun process(uAnnotation: UAnnotation): Boolean {
 
         val uMethod = uAnnotation.getParentOfType<UMethod>()
-        if(uMethod != null) {
 
-            val parentType = DgsDataFetcher.getParentType(uMethod)
-            val field = DgsDataFetcher.getField(uMethod)
+        if (uMethod != null) {
+            if(DgsDataFetcher.isDataFetcherAnnotation(uAnnotation)) {
 
-            //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
-            if(parentType != null) {
-                val dgsDataFetcher = DgsDataFetcher(
-                    parentType,
-                    field,
-                    uMethod.sourcePsi!!,
-                    uAnnotation.sourcePsi!!,
-                    uAnnotation.sourcePsi?.containingFile!!,
-                    graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
-                )
+                val parentType = DgsDataFetcher.getParentType(uMethod)
+                val field = DgsDataFetcher.getField(uMethod)
+
+                //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
+                if (parentType != null) {
+                    val dgsDataFetcher = DgsDataFetcher(
+                        parentType,
+                        field,
+                        uMethod.sourcePsi!!,
+                        uAnnotation.sourcePsi!!,
+                        uAnnotation.sourcePsi?.containingFile!!,
+                        graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
+                    )
 
                     dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
                 }
-            } else if (DgsEntityFetcher.isEntityFetcherAnnotation(psiAnnotation)) {
-                val parentType = DgsEntityFetcher.getParentType(psiMethod)
-                val field = DgsEntityFetcher.getField(psiMethod)
+            } else if (DgsEntityFetcher.isEntityFetcherAnnotation(uAnnotation)) {
+                val field = DgsEntityFetcher.getName(uMethod)
 
                 val dgsEntityFetcher = DgsEntityFetcher(
-                        parentType,
-                        field,
-                        psiMethod,
-                        psiAnnotation,
-                        psiAnnotation.containingFile,
-                        graphQLSchemaRegistry.psiForSchemaType(psiMethod, parentType, field)?.orNull()
+                    field,
+                    uMethod?.sourcePsi!!,
+                    uAnnotation.sourcePsi!!,
+                    uAnnotation.sourcePsi?.containingFile!!,
+                    graphQLSchemaRegistry.psiForSchemaType(uMethod, "_entities", field)?.orNull()
                 )
 
                 dgsComponentIndex.entityFetchers.add(dgsEntityFetcher)

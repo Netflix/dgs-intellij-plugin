@@ -84,7 +84,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
             StubIndexKey<String, KtAnnotationEntry> key = KotlinAnnotationsIndex.getInstance().getKey();
             stubIndex.processAllKeys(key, project, annotation -> {
-                if (dataFetcherAnnotations.contains(annotation)) {
+                if (annotations.contains(annotation)) {
                     System.out.println(annotation);
                     stubIndex.getElements(key, annotation, project, GlobalSearchScope.projectScope(project), KtAnnotationEntry.class).forEach(dataFetcherAnnotation -> {
                         UAnnotation uElement = (UAnnotation) UastContextKt.toUElement(dataFetcherAnnotation);
