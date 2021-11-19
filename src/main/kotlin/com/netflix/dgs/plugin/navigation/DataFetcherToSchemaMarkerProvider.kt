@@ -20,39 +20,39 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.openapi.util.IconLoader
-import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiIdentifier
-import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.services.DgsService
+import org.jetbrains.uast.UAnnotation
+import org.jetbrains.uast.toUElement
 
 class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
     override fun collectNavigationMarkers(
         element: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
     ) {
-        if (element is PsiAnnotation) {
+        val uElement = element.toUElement()
 
-            if (DgsDataFetcher.isDataFetcherAnnotation(element)) {
+        if (uElement is UAnnotation) {
+
+            if (DgsDataFetcher.isDataFetcherAnnotation(uElement)) {
 
                 val dgsService = element.project.getService(DgsService::class.java)
                 val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation == element }
 
                 if (dgsDataFetcher?.schemaPsi != null) {
 
-                    val psiIdentifier = PsiTreeUtil.findChildOfType(element, PsiIdentifier::class.java)
+                    val psiIdentifier = PsiTreeUtil.findChildOfType(element, PsiIdentifier::class.java)?:element
 
-                    if (psiIdentifier != null) {
-                        val builder =
-                            NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
-                                .setTargets(dgsDataFetcher.schemaPsi)
-                                .setTooltipText("Navigate to GraphQL schema type")
-                                .createLineMarkerInfo(psiIdentifier)
+                    val builder =
+                        NavigationGutterIconBuilder.create(IconLoader.getIcon("/icons/dgs.svg", this::class.java))
+                            .setTargets(dgsDataFetcher.schemaPsi)
+                            .setTooltipText("Navigate to GraphQL schema type")
+                            .createLineMarkerInfo(psiIdentifier)
 
-                        result.add(builder)
-                    }
+                    result.add(builder)
                 }
             }
 

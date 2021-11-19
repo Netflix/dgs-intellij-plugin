@@ -24,7 +24,7 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.evaluateString
 import org.jetbrains.uast.toUElement
 
-data class DgsDataFetcher(val parentType: String, val field: String, val psiMethod: PsiMethod, val psiAnnotation: PsiAnnotation, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
+data class DgsDataFetcher(val parentType: String, val field: String, val psiMethod: PsiElement, val psiAnnotation: PsiElement, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
     companion object {
         fun isDataFetcherAnnotation(annotation: PsiAnnotation): Boolean {
             return when (annotation.qualifiedName) {
@@ -36,8 +36,14 @@ data class DgsDataFetcher(val parentType: String, val field: String, val psiMeth
             }
         }
 
-        fun isDataFetcherMethod(method: PsiMethod): Boolean {
-            return method.annotations.any { isDataFetcherAnnotation(it) }
+        fun isDataFetcherAnnotation(annotation: UAnnotation): Boolean {
+            return when (annotation.qualifiedName) {
+                "com.netflix.graphql.dgs.DgsQuery" -> true
+                "com.netflix.graphql.dgs.DgsMutation" -> true
+                "com.netflix.graphql.dgs.DgsSubscription" -> true
+                "com.netflix.graphql.dgs.DgsData" -> true
+                else -> false
+            }
         }
 
         fun getParentType(annotation: PsiAnnotation): String? {

@@ -16,34 +16,34 @@
 
 package com.netflix.dgs.plugin.services
 
-import com.intellij.psi.PsiAnnotation
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.Processor
 import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.DgsEntityFetcher
 import com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry
+import org.jetbrains.uast.UAnnotation
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.getParentOfType
 
-class DgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry, private val dgsComponentIndex: DgsComponentIndex) : Processor<PsiAnnotation> {
-    override fun process(psiAnnotation: PsiAnnotation): Boolean {
-        val psiMethod = PsiTreeUtil.getParentOfType(psiAnnotation, PsiMethod::class.java)
-        if(psiMethod != null) {
+class UDgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry, private val dgsComponentIndex: DgsComponentIndex) : Processor<UAnnotation> {
+    override fun process(uAnnotation: UAnnotation): Boolean {
 
-            if (DgsDataFetcher.isDataFetcherAnnotation(psiAnnotation)) {
-                val parentType = DgsDataFetcher.getParentType(psiMethod)
-                val field = DgsDataFetcher.getField(psiMethod)
+        val uMethod = uAnnotation.getParentOfType<UMethod>()
+        if(uMethod != null) {
 
-                //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
-                if (parentType != null) {
-                    val dgsDataFetcher = DgsDataFetcher(
-                            parentType,
-                            field,
-                            psiMethod,
-                            psiAnnotation,
-                            psiAnnotation.containingFile,
-                            graphQLSchemaRegistry.psiForSchemaType(psiMethod, parentType, field)?.orNull()
-                    )
+            val parentType = DgsDataFetcher.getParentType(uMethod)
+            val field = DgsDataFetcher.getField(uMethod)
+
+            //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
+            if(parentType != null) {
+                val dgsDataFetcher = DgsDataFetcher(
+                    parentType,
+                    field,
+                    uMethod.sourcePsi!!,
+                    uAnnotation.sourcePsi!!,
+                    uAnnotation.sourcePsi?.containingFile!!,
+                    graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
+                )
 
                     dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
                 }
