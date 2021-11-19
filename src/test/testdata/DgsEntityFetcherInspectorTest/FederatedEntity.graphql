@@ -1,0 +1,6 @@
+scalar _FieldSet
+directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+type Movie <warning descr="An entity fetcher implementation with @DgsEntityFetcher annotation needs to be implemented for federated types with @key.">@key(fields:"movieId")</warning> {
+    movieId: String
+    budget: Int
+}

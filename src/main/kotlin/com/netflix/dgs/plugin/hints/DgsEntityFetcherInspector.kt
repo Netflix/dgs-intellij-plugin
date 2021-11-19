@@ -59,10 +59,9 @@ class DgsEntityFetcherInspector : LocalInspectionTool() {
                         )
 
                         holder.registerProblem(
-                                (directives[0] as GraphQLDirectiveImpl).navigationElement,
+                                (directives[0] as GraphQLDirectiveImpl),
                                 message,
-                                ProblemHighlightType.WARNING,
-                                DgsEntityFetcherFix()
+                                ProblemHighlightType.WARNING
                         )
                     }
                 }
