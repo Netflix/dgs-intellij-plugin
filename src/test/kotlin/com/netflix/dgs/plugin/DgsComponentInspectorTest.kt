@@ -16,13 +16,6 @@
 
 package com.netflix.dgs.plugin
 
-import com.intellij.openapi.Disposable
-import com.intellij.openapi.module.Module
-import com.intellij.testFramework.LightProjectDescriptor
-import com.intellij.testFramework.PsiTestUtil
-import com.intellij.testFramework.fixtures.CodeInsightTestUtil
-import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.netflix.dgs.plugin.hints.DgsComponentInspector
 
 class DgsComponentInspectorTest : DgsTestCase() {
@@ -36,6 +29,4 @@ class DgsComponentInspectorTest : DgsTestCase() {
         myFixture.launchAction(myFixture.findSingleIntention("A class should be annotated @DgsComponent when DGS annotations are used within the class"))
         myFixture.checkResultByFile("FixedMissingDgsComponent.java")
     }
-
-    override fun getTestDataPath() = "src/test/testData/dgscomponenthint"
 }

@@ -16,14 +16,6 @@
 
 package com.netflix.dgs.plugin
 
-import com.intellij.openapi.Disposable
-import com.intellij.openapi.module.Module
-import com.intellij.openapi.roots.ContentEntry
-import com.intellij.openapi.roots.ModifiableRootModel
-import com.intellij.testFramework.LightProjectDescriptor
-import com.intellij.testFramework.PsiTestUtil
-import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import com.netflix.dgs.plugin.hints.DgsDataSimplifyingInspector
 
 class DgsDataSimplifyingInspectorTest: DgsTestCase() {
@@ -36,9 +28,5 @@ class DgsDataSimplifyingInspectorTest: DgsTestCase() {
         myFixture.launchAction(myFixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
         myFixture.checkResultByFile("FixedDgsDataForQuery.java")
     }
-
-
-
-    override fun getTestDataPath() = "src/test/testData/dgsdata"
 }
 

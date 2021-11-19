@@ -110,6 +110,14 @@ tasks {
         })
     }
 
+    test {
+        // show standard out and standard error of the test JVM(s) on the console
+        testLogging {
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showStandardStreams = true
+        }
+    }
+
     runPluginVerifier {
         ideVersions.set(properties("pluginVerifierIdeVersions").split(',').map(String::trim).filter(String::isNotEmpty))
     }

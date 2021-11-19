@@ -21,7 +21,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import com.intellij.testFramework.fixtures.MavenDependencyUtil
+import java.nio.file.Paths
 
 abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
     override fun getProjectDescriptor(): LightProjectDescriptor {
@@ -48,4 +48,5 @@ abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
         PsiTestUtil.addLibrary(projectDisposable, module, libraryName, "src/test/testdata/lib/", libraryJarName)
     }
 
+    override fun getTestDataPath() = Paths.get("src/test/testdata/" + this::class.java.simpleName).toAbsolutePath().toString()
 }
