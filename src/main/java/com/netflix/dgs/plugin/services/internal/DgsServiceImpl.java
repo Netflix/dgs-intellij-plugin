@@ -33,11 +33,12 @@ import java.util.Set;
 
 public class DgsServiceImpl implements DgsService, Disposable {
     private final Project project;
-    private final Set<String> dataFetcherAnnotations = Set.of(
+    private final Set<String> annotations = Set.of(
             "DgsQuery",
             "DgsMutation",
             "DgsSubscription",
-            "DgsData");
+            "DgsData",
+            "DgsEntityFetcher");
     private volatile DgsComponentIndex cachedComponentIndex;
 
     public DgsServiceImpl(Project project) {
@@ -83,7 +84,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             DgsComponentIndex dgsComponentIndex = new DgsComponentIndex();
             var processor = new DgsDataProcessor(project.getService(GraphQLSchemaRegistry.class), dgsComponentIndex);
 
-            dataFetcherAnnotations.forEach(dataFetcherAnnotation -> {
+            annotations.forEach(dataFetcherAnnotation -> {
                 stubIndex.processElements(JavaStubIndexKeys.ANNOTATIONS, dataFetcherAnnotation, project, GlobalSearchScope.projectScope(project), PsiAnnotation.class, annotation -> {
                     processor.process(annotation);
                     return true;

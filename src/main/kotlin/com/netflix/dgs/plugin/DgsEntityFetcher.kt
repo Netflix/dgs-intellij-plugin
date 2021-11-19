@@ -38,7 +38,7 @@ data class DgsEntityFetcher(val parentType: String, val field: String, val psiMe
         }
 
         fun getParentType(annotation: PsiAnnotation): String {
-            return "_entities"
+            return "_entities";
         }
 
         fun getParentType(method: PsiMethod): String {

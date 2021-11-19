@@ -22,6 +22,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.Processor
 import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.DgsDataFetcher
+import com.netflix.dgs.plugin.DgsEntityFetcher
 import com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry
 
 class DgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry, private val dgsComponentIndex: DgsComponentIndex) : Processor<PsiAnnotation> {
@@ -29,21 +30,37 @@ class DgsDataProcessor(private val graphQLSchemaRegistry: GraphQLSchemaRegistry,
         val psiMethod = PsiTreeUtil.getParentOfType(psiAnnotation, PsiMethod::class.java)
         if(psiMethod != null) {
 
-            val parentType = DgsDataFetcher.getParentType(psiMethod)
-            val field = DgsDataFetcher.getField(psiMethod)
+            if (DgsDataFetcher.isDataFetcherAnnotation(psiAnnotation)) {
+                val parentType = DgsDataFetcher.getParentType(psiMethod)
+                val field = DgsDataFetcher.getField(psiMethod)
 
-            //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
-            if(parentType != null) {
-                val dgsDataFetcher = DgsDataFetcher(
-                    parentType,
-                    field,
-                    psiMethod,
-                    psiAnnotation,
-                    psiAnnotation.containingFile,
-                    graphQLSchemaRegistry.psiForSchemaType(psiMethod, parentType, field)?.orNull()
+                //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
+                if (parentType != null) {
+                    val dgsDataFetcher = DgsDataFetcher(
+                            parentType,
+                            field,
+                            psiMethod,
+                            psiAnnotation,
+                            psiAnnotation.containingFile,
+                            graphQLSchemaRegistry.psiForSchemaType(psiMethod, parentType, field)?.orNull()
+                    )
+
+                    dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+                }
+            } else if (DgsEntityFetcher.isEntityFetcherAnnotation(psiAnnotation)) {
+                val parentType = DgsEntityFetcher.getParentType(psiMethod)
+                val field = DgsEntityFetcher.getField(psiMethod)
+
+                val dgsEntityFetcher = DgsEntityFetcher(
+                        parentType,
+                        field,
+                        psiMethod,
+                        psiAnnotation,
+                        psiAnnotation.containingFile,
+                        graphQLSchemaRegistry.psiForSchemaType(psiMethod, parentType, field)?.orNull()
                 )
 
-                dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+                dgsComponentIndex.entityFetchers.add(dgsEntityFetcher)
             }
         }
 

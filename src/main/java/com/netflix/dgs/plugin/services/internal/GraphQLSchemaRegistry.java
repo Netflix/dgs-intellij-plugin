@@ -38,27 +38,35 @@ public class GraphQLSchemaRegistry {
     }
 
     public @Nullable Optional<PsiElement> psiForSchemaType(@NotNull PsiElement psiElement, @Nullable String parentType, @Nullable String field) {
+
         TypeDefinitionRegistry registry = getRegistry(psiElement);
-        List<ObjectTypeExtensionDefinition> objectTypeExtensionDefinitions = registry.objectTypeExtensions().get(parentType);
-
-        ObjectTypeDefinition type = null;
-        if(objectTypeExtensionDefinitions != null && !objectTypeExtensionDefinitions.isEmpty()) {
-            type = objectTypeExtensionDefinitions.get(0);
-        } else {
-            Optional<ObjectTypeDefinition> objectTypeDefinition = registry.getType(parentType, ObjectTypeDefinition.class);
-            if(objectTypeDefinition.isPresent()) {
-                type = objectTypeDefinition.get();
-            }
-        }
-
+        ObjectTypeDefinition type = getTypeDefinition(registry, parentType);
         if(type != null) {
             Optional<FieldDefinition> schemaField = type.getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
             if(schemaField.isPresent()) {
                 return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
             }
-         }
+         } else if(parentType.equals("_entities")) {
+            type = getTypeDefinition(registry, field);
+            return Optional.ofNullable(type.getElement());
+        }
 
         return Optional.empty();
+    }
+
+    private ObjectTypeDefinition getTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
+
+        List<ObjectTypeExtensionDefinition> objectTypeExtensionDefinitions = registry.objectTypeExtensions().get(schemaType);
+        ObjectTypeDefinition objectType = null;
+        if(objectTypeExtensionDefinitions != null && !objectTypeExtensionDefinitions.isEmpty()) {
+            objectType = objectTypeExtensionDefinitions.get(0);
+        } else {
+            Optional<ObjectTypeDefinition> objectTypeDefinition = registry.getType(schemaType, ObjectTypeDefinition.class);
+            if(objectTypeDefinition.isPresent()) {
+                objectType = objectTypeDefinition.get();
+            }
+        }
+        return objectType;
     }
 
     private TypeDefinitionRegistry getRegistry(@NotNull PsiElement psiElement) {

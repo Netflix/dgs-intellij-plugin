@@ -25,10 +25,12 @@ import com.intellij.lang.jsgraphql.psi.impl.GraphQLDirectiveImpl
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
 import com.netflix.dgs.plugin.MyBundle
 import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.idea.util.addAnnotation
+import org.jetbrains.kotlin.js.translate.utils.finalElement
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
@@ -50,22 +52,22 @@ class DgsEntityFetcherInspector : LocalInspectionTool() {
                 }
                 if (directives.any { (it.nameIdentifier as GraphQLIdentifierImpl).name == "key" }) {
                     // look up the corresponding entity fetcher in the type registry
-                    val entityFetcher = dgsService.getDgsComponentIndex().entityFetchers.find { it.schemaPsi == element }
+                    val entityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }
                     if (entityFetcher == null) {
                         val message = MyBundle.getMessage(
                             "dgs.inspection.missing.entityfetcher.annotation"
                         )
+
                         holder.registerProblem(
-                            (directives[0] as GraphQLDirectiveImpl).navigationElement,
-                            message,
-                            ProblemHighlightType.WARNING,
-                            DgsEntityFetcherFix()
+                                (directives[0] as GraphQLDirectiveImpl).navigationElement,
+                                message,
+                                ProblemHighlightType.WARNING,
+                                DgsEntityFetcherFix()
                         )
                     }
                 }
             }
         }
-
     }
 }
 
