@@ -3,10 +3,7 @@
 # dgs-intellij-plugin Changelog
 
 ## [Unreleased]
-
-We're heading towards the first public release of the plugin!
-The following is currently supported:
-
+### Added
 * Navigation from a schema file to data fetchers in Java/Kotlin code
 * Navigation from data fetchers back to the schema definitions
 * A hint/quickfix for when a `@DgsComponent` annotation is missing
