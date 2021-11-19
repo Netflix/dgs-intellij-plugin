@@ -2,7 +2,7 @@
 
 # dgs-intellij-plugin Changelog
 
-## [1.0.0-beta]
+## [Unreleased]
 
 We're heading towards the first public release of the plugin!
 The following is currently supported:
