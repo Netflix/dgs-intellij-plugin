@@ -69,17 +69,3 @@ class DgsEntityFetcherInspector : LocalInspectionTool() {
         }
     }
 }
-
-class DgsEntityFetcherFix : LocalQuickFix {
-    override fun getFamilyName(): String {
-        return name
-    }
-
-    override fun getName(): String {
-        return MyBundle.message("dgs.inspection.missing.component.annotation")
-    }
-
-    override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-    }
-
-}
