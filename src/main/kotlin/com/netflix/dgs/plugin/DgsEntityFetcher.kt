@@ -27,17 +27,11 @@ import org.jetbrains.uast.toUElement
 data class DgsEntityFetcher(val name: String, val psiMethod: PsiElement, val psiAnnotation: PsiElement, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
     companion object {
         fun isEntityFetcherAnnotation(annotation: UAnnotation): Boolean {
-            return when (annotation.qualifiedName) {
-                "com.netflix.graphql.dgs.DgsEntityFetcher" -> true
-                else -> false
-            }
+            return annotation.qualifiedName == "com.netflix.graphql.dgs.DgsEntityFetcher"
         }
 
         fun isEntityFetcherAnnotation(annotation: PsiAnnotation): Boolean {
-            return when (annotation.qualifiedName) {
-                "com.netflix.graphql.dgs.DgsEntityFetcher" -> true
-                else -> false
-            }
+            return annotation.qualifiedName == "com.netflix.graphql.dgs.DgsEntityFetcher"
         }
 
         fun getEntityFetcherAnnotation(method: PsiMethod) =

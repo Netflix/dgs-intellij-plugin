@@ -103,9 +103,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                     factory.createAnnotationFromText(newAnnotation, null)
                 }
 
-//                descriptor.psiElement.replace(newAnnotation)
                 method?.sourcePsi?.addBefore(newAnnotation, method.modifierList)
-
 
                 project.getService(DgsService::class.java).clearCache()
             } else if(file is KtFile) {

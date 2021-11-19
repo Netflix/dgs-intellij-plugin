@@ -57,7 +57,7 @@ class UDgsDataProcessor(
 
                 val dgsEntityFetcher = DgsEntityFetcher(
                     field,
-                    uMethod?.sourcePsi!!,
+                    uMethod.sourcePsi!!,
                     uAnnotation.sourcePsi!!,
                     uAnnotation.sourcePsi?.containingFile!!,
                     graphQLSchemaRegistry.psiForSchemaType(uMethod, "_entities", field)?.orNull()

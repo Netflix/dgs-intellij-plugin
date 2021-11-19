@@ -24,34 +24,37 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.evaluateString
 import org.jetbrains.uast.toUElement
 
-data class DgsDataFetcher(val parentType: String, val field: String, val psiMethod: PsiElement, val psiAnnotation: PsiElement, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
+data class DgsDataFetcher(
+    val parentType: String,
+    val field: String,
+    val psiMethod: PsiElement,
+    val psiAnnotation: PsiElement,
+    val psiFile: PsiFile,
+    val schemaPsi: PsiElement?
+) {
     companion object {
+        private val annotationQualifiedNames = setOf(
+            "com.netflix.graphql.dgs.DgsQuery",
+            "com.netflix.graphql.dgs.DgsMutation",
+            "com.netflix.graphql.dgs.DgsSubscription",
+            "com.netflix.graphql.dgs.DgsData"
+        )
+
         fun isDataFetcherAnnotation(annotation: PsiAnnotation): Boolean {
-            return when (annotation.qualifiedName) {
-                "com.netflix.graphql.dgs.DgsQuery" -> true
-                "com.netflix.graphql.dgs.DgsMutation" -> true
-                "com.netflix.graphql.dgs.DgsSubscription" -> true
-                "com.netflix.graphql.dgs.DgsData" -> true
-                else -> false
-            }
+           return annotationQualifiedNames.contains(annotation.qualifiedName)
         }
 
         fun isDataFetcherAnnotation(annotation: UAnnotation): Boolean {
-            return when (annotation.qualifiedName) {
-                "com.netflix.graphql.dgs.DgsQuery" -> true
-                "com.netflix.graphql.dgs.DgsMutation" -> true
-                "com.netflix.graphql.dgs.DgsSubscription" -> true
-                "com.netflix.graphql.dgs.DgsData" -> true
-                else -> false
-            }
+            return annotationQualifiedNames.contains(annotation.qualifiedName)
         }
 
-        fun getParentType(annotation: PsiAnnotation): String? {
+        private fun getParentType(annotation: PsiAnnotation): String? {
             return when (annotation.qualifiedName) {
                 "com.netflix.graphql.dgs.DgsQuery" -> "Query"
                 "com.netflix.graphql.dgs.DgsMutation" -> "Mutation"
                 "com.netflix.graphql.dgs.DgsSubscription" -> "Subscription"
-                "com.netflix.graphql.dgs.DgsData" -> (annotation.toUElement() as UAnnotation).findAttributeValue("parentType")?.evaluateString()
+                "com.netflix.graphql.dgs.DgsData" -> (annotation.toUElement() as UAnnotation).findAttributeValue("parentType")
+                    ?.evaluateString()
                 else -> throw IllegalArgumentException("Annotation ${annotation.qualifiedName} is not a data fetcher annotation")
             }
         }
@@ -61,17 +64,17 @@ data class DgsDataFetcher(val parentType: String, val field: String, val psiMeth
             return getParentType(annotation)
         }
 
-        fun getDataFetcherAnnotation(method: PsiMethod) =
+        private fun getDataFetcherAnnotation(method: PsiMethod) =
             (method.annotations.find { a -> isDataFetcherAnnotation(a) }
                 ?: throw IllegalArgumentException("Method ${method.name} is not a data fetcher"))
 
-        fun getFieldFromAnnotation(annotation: PsiAnnotation): String? {
+        private fun getFieldFromAnnotation(annotation: PsiAnnotation): String? {
             return (annotation.toUElement() as UAnnotation).findAttributeValue("field")?.evaluateString()
         }
 
         fun getField(method: PsiMethod): String {
             val dataFetcherAnnotation = getDataFetcherAnnotation(method)
-            return getFieldFromAnnotation(dataFetcherAnnotation)?:method.name
+            return getFieldFromAnnotation(dataFetcherAnnotation) ?: method.name
         }
     }
 }
