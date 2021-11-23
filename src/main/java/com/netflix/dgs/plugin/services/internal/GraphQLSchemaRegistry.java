@@ -46,9 +46,13 @@ public class GraphQLSchemaRegistry {
             if(schemaField.isPresent()) {
                 return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
             }
-         } else if(parentType.equals("_entities")) {
+         } else if("_entities".equals(parentType)) {
             type = getTypeDefinition(registry, field);
-            return Optional.ofNullable(type.getElement());
+            if(type != null) {
+                return Optional.ofNullable(type.getElement());
+            } else {
+                return Optional.empty();
+            }
         }
 
         return Optional.empty();
