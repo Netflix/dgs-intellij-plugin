@@ -18,21 +18,14 @@ package com.netflix.dgs.plugin.hints
 
 import com.intellij.codeInspection.*
 import com.intellij.codeInspection.util.IntentionFamilyName
-import com.intellij.lang.PsiBuilder
-import com.intellij.lang.PsiBuilderUtil
-import com.intellij.lang.jvm.JvmAnnotation
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
-import com.intellij.psi.impl.light.LightPsiClassBuilder
-import com.intellij.psi.util.PsiUtil
 import com.intellij.uast.UastVisitorAdapter
 import com.intellij.util.castSafelyTo
+import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.MyBundle
-import org.jetbrains.kotlin.idea.core.ShortenReferences
 import org.jetbrains.kotlin.idea.util.addAnnotation
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.nj2k.NewJavaToKotlinConverter.Companion.addImports
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.getUastParentOfType
@@ -48,7 +41,7 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
                     node.javaPsi.hasAnnotation("com.netflix.graphql.dgs.DgsComponent")
                 if (Arrays.stream(node.methods)
                         .anyMatch { m ->
-                            dgsAnnotations.stream().anyMatch { annotation -> m.javaPsi.hasAnnotation(annotation) }
+                            DgsConstants.dgsAnnotations.stream().anyMatch { annotation -> m.javaPsi.hasAnnotation(annotation) }
                         } && !hasDgsComponentAnnotation
                 ) {
                     node.identifyingElement?.let {
@@ -64,24 +57,6 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
                 return false
             }
         }, false)
-    }
-
-    companion object {
-        private val log = Logger.getInstance("dgs")
-        private val dgsAnnotations = setOf(
-            "com.netflix.graphql.dgs.DgsData",
-            "com.netflix.graphql.dgs.DgsQuery",
-            "com.netflix.graphql.dgs.DgsMutation",
-            "com.netflix.graphql.dgs.DgsSubscription",
-            "com.netflix.graphql.dgs.DgsRuntimeWiring",
-            "com.netflix.graphql.dgs.DgsScalar",
-            "com.netflix.graphql.dgs.DgsCodeRegistry",
-            "com.netflix.graphql.dgs.DgsDefaultTypeResolver",
-            "com.netflix.graphql.dgs.DgsDirective",
-            "com.netflix.graphql.dgs.DgsEntityFetcher",
-            "com.netflix.graphql.dgs.DgsTypeDefinitionRegistry",
-            "com.netflix.graphql.dgs.DgsTypeResolver",
-        )
     }
 
     object DgsComponentQuickfix : LocalQuickFix {
