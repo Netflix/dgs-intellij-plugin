@@ -38,6 +38,10 @@
                          enabledByDefault="true" groupName="DGS inspections" groupPathKey="dgs"
                          key="dgs.inspection.missing.entityfetcher.annotation"/>
 
+        <localInspection language="UAST" implementationClass="com.netflix.dgs.plugin.hints.DgsFieldSimplifyingInspector"
+                         enabledByDefault="true" groupName="DGS inspections" groupPathKey="dgs"
+                         key="dgs.inspection.fieldvalue.simplify"/>
+
         <codeInsight.lineMarkerProvider language="UAST" implementationClass="com.netflix.dgs.plugin.navigation.DataFetcherToSchemaMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.SchemaToDataFetcherMarkerProvider"/>
 
