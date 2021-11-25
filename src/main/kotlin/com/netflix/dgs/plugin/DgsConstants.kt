@@ -16,6 +16,8 @@
 
 package com.netflix.dgs.plugin
 
+import com.intellij.openapi.util.IconLoader
+
 object DgsConstants {
     val dgsAnnotations = setOf(
         "com.netflix.graphql.dgs.DgsData",
@@ -31,4 +33,6 @@ object DgsConstants {
         "com.netflix.graphql.dgs.DgsTypeDefinitionRegistry",
         "com.netflix.graphql.dgs.DgsTypeResolver",
     )
+
+    val dgsIcon = IconLoader.getIcon("/icons/dgs.svg", this::class.java)
 }
