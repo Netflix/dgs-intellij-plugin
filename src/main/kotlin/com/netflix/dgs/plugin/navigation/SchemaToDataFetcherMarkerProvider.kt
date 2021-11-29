@@ -20,6 +20,9 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.lang.jsgraphql.psi.GraphQLFieldDefinition
+import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeDefinition
+import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeExtensionDefinition
+import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.PsiElement
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.services.DgsService
@@ -32,14 +35,27 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
         val dgsService = element.project.getService(DgsService::class.java)
 
         if (element is GraphQLFieldDefinition) {
-            val dataFetcher = dgsService.getDgsComponentIndex().dataFetchers.find { it.schemaPsi == element }
-
+            val dataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.schemaPsi == element }
             if (dataFetcher != null) {
                 val builder =
+
                     NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
                         .setTargets(dataFetcher.psiAnnotation)
                         .setTooltipText("Navigate to DGS data fetcher")
                         .createLineMarkerInfo(element)
+
+                result.add(builder)
+            }
+        }
+
+        if (element is GraphQLObjectTypeDefinition || element is GraphQLObjectTypeExtensionDefinition) {
+            val entityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }
+            if (entityFetcher != null) {
+                val builder =
+                        NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
+                                .setTargets(entityFetcher.psiAnnotation)
+                                .setTooltipText("Navigate to DGS entity fetcher")
+                                .createLineMarkerInfo(element)
 
                 result.add(builder)
             }
