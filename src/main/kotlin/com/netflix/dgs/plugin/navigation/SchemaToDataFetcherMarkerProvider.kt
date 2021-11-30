@@ -19,10 +19,7 @@ package com.netflix.dgs.plugin.navigation
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
-import com.intellij.lang.jsgraphql.psi.GraphQLFieldDefinition
-import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeDefinition
-import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeExtensionDefinition
-import com.intellij.openapi.util.IconLoader
+import com.intellij.lang.jsgraphql.psi.*
 import com.intellij.psi.PsiElement
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.services.DgsService
@@ -34,31 +31,43 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
     ) {
         val dgsService = element.project.getService(DgsService::class.java)
 
-        if (element is GraphQLFieldDefinition) {
-            val dataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.schemaPsi == element }
-            if (dataFetcher != null) {
-                val builder =
-
-                    NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
-                        .setTargets(dataFetcher.psiAnnotation)
-                        .setTooltipText("Navigate to DGS data fetcher")
-                        .createLineMarkerInfo(element)
-
-                result.add(builder)
-            }
-        }
-
-        if (element is GraphQLObjectTypeDefinition || element is GraphQLObjectTypeExtensionDefinition) {
-            val entityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }
-            if (entityFetcher != null) {
-                val builder =
+        val iconBuilder = when (element) {
+            is GraphQLFieldDefinition -> {
+                dgsService.dgsComponentIndex.dataFetchers.find { it.schemaPsi == element }?.let {
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
-                                .setTargets(entityFetcher.psiAnnotation)
-                                .setTooltipText("Navigate to DGS entity fetcher")
-                                .createLineMarkerInfo(element)
-
-                result.add(builder)
+                            .setTargets(it.psiAnnotation)
+                            .setTooltipText("Navigate to DGS data fetcher")
+                            .createLineMarkerInfo(element)
+                }
             }
+            is GraphQLObjectTypeDefinition, is GraphQLObjectTypeExtensionDefinition -> {
+                dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }?.let {
+                        NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
+                            .setTargets(it.psiAnnotation)
+                            .setTooltipText("Navigate to DGS entity fetcher")
+                            .createLineMarkerInfo(element)
+                }
+            }
+            is GraphQLScalarTypeDefinition -> {
+                dgsService.dgsComponentIndex.scalars.find { it.schemaPsi == element }?.let {
+                        NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
+                            .setTargets(it.psiAnnotation)
+                            .setTooltipText("Navigate to DGS scalar implementation")
+                            .createLineMarkerInfo(element)
+                }
+            }
+            is GraphQLDirectiveDefinition -> {
+                dgsService.dgsComponentIndex.directives.find { it.schemaPsi == element }?.let {
+                        NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
+                            .setTargets(it.psiAnnotation)
+                            .setTooltipText("Navigate to DGS directive implementation")
+                            .createLineMarkerInfo(element)
+                }
+            }
+            else -> null
         }
+
+        iconBuilder?.apply { result.add(this) }
     }
+
 }
