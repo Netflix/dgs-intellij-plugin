@@ -24,7 +24,13 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.evaluateString
 import org.jetbrains.uast.toUElement
 
-data class DgsEntityFetcher(val name: String, val psiMethod: PsiElement, val psiAnnotation: PsiElement, val psiFile: PsiFile, val schemaPsi: PsiElement?) {
+data class DgsEntityFetcher(
+    override val name: String,
+    val psiMethod: PsiElement,
+    override val psiAnnotation: PsiElement,
+    val psiFile: PsiFile,
+    val schemaPsi: PsiElement?
+) : NamedNavigationComponent{
     companion object {
         fun isEntityFetcherAnnotation(annotation: UAnnotation): Boolean {
             return annotation.qualifiedName == "com.netflix.graphql.dgs.DgsEntityFetcher"
@@ -44,7 +50,7 @@ data class DgsEntityFetcher(val name: String, val psiMethod: PsiElement, val psi
 
         fun getName(method: PsiMethod): String {
             val entityFetcherAnnotation = getEntityFetcherAnnotation(method)
-            return getNameFromAnnotation(entityFetcherAnnotation)?:method.name
+            return getNameFromAnnotation(entityFetcherAnnotation) ?: method.name
         }
     }
 }

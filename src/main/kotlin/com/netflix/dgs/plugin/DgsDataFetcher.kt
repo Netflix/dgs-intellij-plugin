@@ -28,10 +28,10 @@ data class DgsDataFetcher(
     val parentType: String,
     val field: String,
     val psiMethod: PsiElement,
-    val psiAnnotation: PsiElement,
+    override val psiAnnotation: PsiElement,
     val psiFile: PsiFile,
     val schemaPsi: PsiElement?
-) {
+): NamedNavigationComponent {
     companion object {
         private val annotationQualifiedNames = setOf(
             "com.netflix.graphql.dgs.DgsQuery",
@@ -77,4 +77,6 @@ data class DgsDataFetcher(
             return getFieldFromAnnotation(dataFetcherAnnotation) ?: method.name
         }
     }
+
+    override val name = "${parentType}.${field}"
 }

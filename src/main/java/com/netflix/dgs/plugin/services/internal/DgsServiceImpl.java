@@ -16,22 +16,29 @@
 
 package com.netflix.dgs.plugin.services.internal;
 
+import com.intellij.ide.projectView.ProjectView;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.psi.PsiAnnotation;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiReferenceList;
 import com.intellij.psi.impl.java.stubs.index.JavaStubIndexKeys;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.psi.util.PsiModificationTracker;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.netflix.dgs.plugin.DgsCustomContext;
 import com.netflix.dgs.plugin.services.DgsComponentIndex;
+import com.netflix.dgs.plugin.services.DgsComponentProcessor;
 import com.netflix.dgs.plugin.services.DgsService;
-import com.netflix.dgs.plugin.services.UDgsDataProcessor;
 import org.jetbrains.kotlin.idea.KotlinLanguage;
 import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex;
+import org.jetbrains.kotlin.idea.stubindex.KotlinSuperClassIndex;
 import org.jetbrains.kotlin.psi.KtAnnotationEntry;
+import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.uast.UAnnotation;
 import org.jetbrains.uast.UastContextKt;
 
@@ -44,7 +51,11 @@ public class DgsServiceImpl implements DgsService, Disposable {
             "DgsMutation",
             "DgsSubscription",
             "DgsData",
-            "DgsEntityFetcher");
+            "DgsEntityFetcher",
+            "DgsDataLoader",
+            "DgsDirective",
+            "DgsRuntimeWiring",
+            "DgsScalar");
     private volatile DgsComponentIndex cachedComponentIndex;
 
     public DgsServiceImpl(Project project) {
@@ -70,7 +81,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             long startTime = System.currentTimeMillis();
             DgsComponentIndex dgsComponentIndex = new DgsComponentIndex();
             GraphQLSchemaRegistry graphQLSchemaRegistry = project.getService(GraphQLSchemaRegistry.class);
-            var processor = new UDgsDataProcessor(graphQLSchemaRegistry, dgsComponentIndex);
+            var processor = new DgsComponentProcessor(graphQLSchemaRegistry, dgsComponentIndex);
 
             annotations.forEach(dataFetcherAnnotation -> {
                 stubIndex.processElements(JavaStubIndexKeys.ANNOTATIONS, dataFetcherAnnotation, project, GlobalSearchScope.projectScope(project), PsiAnnotation.class, annotation -> {
@@ -82,10 +93,19 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 });
             });
 
+            stubIndex.processElements(JavaStubIndexKeys.SUPER_CLASSES, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), PsiReferenceList.class, refList -> {
+                PsiClass clazz = PsiTreeUtil.getParentOfType(refList, PsiClass.class);
+
+                if(clazz != null) {
+                    dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
+                }
+
+                return true;
+            });
+
             StubIndexKey<String, KtAnnotationEntry> key = KotlinAnnotationsIndex.getInstance().getKey();
             stubIndex.processAllKeys(key, project, annotation -> {
                 if (annotations.contains(annotation)) {
-                    System.out.println(annotation);
                     stubIndex.getElements(key, annotation, project, GlobalSearchScope.projectScope(project), KtAnnotationEntry.class).forEach(dataFetcherAnnotation -> {
                         UAnnotation uElement = (UAnnotation) UastContextKt.toUElement(dataFetcherAnnotation);
                         if(uElement != null) {
@@ -96,7 +116,16 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 return true;
             });
 
+            StubIndexKey<String, KtClassOrObject> superClassIndexKey = KotlinSuperClassIndex.getInstance().getKey();
+            stubIndex.processElements(superClassIndexKey, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), KtClassOrObject.class, clazz -> {
+                dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
+               return true;
+            });
+//            stubIndex.processAllKeys(superClassIndexKey, project, item -> {
+
             cachedComponentIndex = dgsComponentIndex;
+
+            ProjectView.getInstance(project).refresh();
 
             long totalTime = System.currentTimeMillis() - startTime;
             System.out.println("DGS indexing took " + totalTime + " ms");
