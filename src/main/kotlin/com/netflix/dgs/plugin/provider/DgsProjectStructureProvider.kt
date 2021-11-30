@@ -29,7 +29,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.ui.SimpleTextAttributes
 import com.netflix.dgs.plugin.DgsConstants
+import com.netflix.dgs.plugin.NamedNavigationComponent
 import com.netflix.dgs.plugin.services.DgsService
+import javax.swing.Icon
 
 class DgsProjectStructureProvider : TreeStructureProvider {
     override fun modify(
@@ -49,7 +51,6 @@ class DgsComponentsRootNode(
     project: Project?,
     settings: ViewSettings?,
 ) : ProjectViewNode<String>(project, "DGS", settings) {
-
     override fun update(presentation: PresentationData) {
         presentation.apply {
             val text = "DGS Components"
@@ -60,10 +61,23 @@ class DgsComponentsRootNode(
         }
     }
 
-    override fun getChildren(): Collection<out AbstractTreeNode<*>> {
+    override fun getChildren(): Collection<AbstractTreeNode<*>> {
 
-        return listOf(DataFetcherRootNode(project, settings))
+        val service = project?.getService(DgsService::class.java)
+        return if (service != null) {
 
+            listOf(
+                DgsNamedRootNode(project, settings, "Data fetchers", service.dgsComponentIndex.dataFetchers),
+                DgsNamedRootNode(project, settings, "Entity fetchers", service.dgsComponentIndex.entityFetchers),
+                DgsNamedRootNode(project, settings, "Data loaders", service.dgsComponentIndex.dataLoaders),
+                DgsNamedRootNode(project, settings, "Directives", service.dgsComponentIndex.directives),
+                DgsNamedRootNode(project, settings, "Runtime wiring", service.dgsComponentIndex.runtimeWirings),
+                DgsNamedRootNode(project, settings, "Scalars", service.dgsComponentIndex.scalars),
+                DgsNamedRootNode(project, settings, "Custom context", service.dgsComponentIndex.customContexts),
+            )
+        } else {
+            emptyList()
+        }
     }
 
     override fun contains(file: VirtualFile): Boolean {
@@ -71,13 +85,15 @@ class DgsComponentsRootNode(
     }
 }
 
-class DataFetcherRootNode(
+class DgsNamedRootNode(
     project: Project?,
     settings: ViewSettings?,
-) : ProjectViewNode<String>(project, "DGS", settings) {
+    private val text: String,
+    private val components: Set<NamedNavigationComponent>,
+    private val elementIcon: Icon = AllIcons.Nodes.Method
+) : ProjectViewNode<String>(project, text, settings) {
     override fun update(presentation: PresentationData) {
         presentation.apply {
-            val text = "Data fetchers"
             val toolTip = children.mapNotNull { it.name }.joinToString(", ")
             val textAttributes = SimpleTextAttributes.REGULAR_ATTRIBUTES
             addText(ColoredFragment(text, toolTip, textAttributes))
@@ -86,11 +102,9 @@ class DataFetcherRootNode(
     }
 
     override fun getChildren(): MutableCollection<out AbstractTreeNode<*>> {
-
-        if(project != null) {
-            val dgsService = project!!.getService(DgsService::class.java)
-            return dgsService.dgsComponentIndex.dataFetchers.map { dataFetcher ->
-                DataFetcherNode(project, settings, dataFetcher.parentType, dataFetcher.field, dataFetcher.psiMethod)
+        if (project != null) {
+            return components.map { component ->
+                DgsNode(project, settings, component.name, component.psiAnnotation, elementIcon)
             }.toMutableList()
         }
 
@@ -102,20 +116,19 @@ class DataFetcherRootNode(
     }
 }
 
-class DataFetcherNode(
+class DgsNode(
     project: Project?,
     settings: ViewSettings?,
-    private val parentType: String,
-    private val field: String,
-    private val psiElement: PsiElement?
-) : ProjectViewNode<String>(project, "DGS", settings) {
+    private val text: String,
+    private val psiElement: PsiElement?,
+    private val theIcon: Icon = AllIcons.Nodes.Method
+) : ProjectViewNode<String>(project, text, settings) {
     override fun update(presentation: PresentationData) {
         presentation.apply {
-            val text = "${parentType}.${field}"
             val toolTip = children.mapNotNull { it.name }.joinToString(", ")
             val textAttributes = SimpleTextAttributes.REGULAR_ATTRIBUTES
             addText(ColoredFragment(text, toolTip, textAttributes))
-            setIcon(AllIcons.Nodes.Method)
+            setIcon(theIcon)
         }
     }
 
@@ -128,10 +141,16 @@ class DataFetcherNode(
     }
 
     override fun navigate(requestFocus: Boolean) {
-        if(project != null && psiElement != null) {
+        if (project != null && psiElement != null) {
 
             val fileEditorManager = FileEditorManager.getInstance(project!!)
-            fileEditorManager.openEditor(OpenFileDescriptor(project!!, psiElement.containingFile.virtualFile, psiElement.textOffset), true)
+            fileEditorManager.openEditor(
+                OpenFileDescriptor(
+                    project!!,
+                    psiElement.containingFile.virtualFile,
+                    psiElement.textOffset
+                ), true
+            )
         }
 
     }
@@ -139,5 +158,12 @@ class DataFetcherNode(
     override fun canNavigate(): Boolean {
         return psiElement != null
     }
-}
 
+    override fun isAlwaysLeaf(): Boolean {
+        return true
+    }
+
+    override fun canNavigateToSource(): Boolean {
+        return true
+    }
+}

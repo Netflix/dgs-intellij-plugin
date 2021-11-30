@@ -16,9 +16,7 @@
 
 package com.netflix.dgs.plugin.services;
 
-import com.intellij.psi.PsiFile;
-import com.netflix.dgs.plugin.DgsDataFetcher;
-import com.netflix.dgs.plugin.DgsEntityFetcher;
+import com.netflix.dgs.plugin.*;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -26,6 +24,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class DgsComponentIndex {
     private final Set<DgsDataFetcher> dataFetchers = new CopyOnWriteArraySet<>();
     private final Set<DgsEntityFetcher> entityFetchers = new CopyOnWriteArraySet<>();
+    private final Set<DgsScalar> scalars = new CopyOnWriteArraySet<>();
+    private final Set<DgsRuntimeWiring> runtimeWirings = new CopyOnWriteArraySet<>();
+    private final Set<DgsCustomContext> customContexts = new CopyOnWriteArraySet<>();
+    private final Set<DgsDirective> directives = new CopyOnWriteArraySet<>();
+    private final Set<DgsDataLoader> dataLoaders = new CopyOnWriteArraySet<>();
 
     public Set<DgsDataFetcher> getDataFetchers() {
         return dataFetchers;
@@ -35,7 +38,23 @@ public class DgsComponentIndex {
         return entityFetchers;
     }
 
-    public void fileUpdated(PsiFile psiFile) {
-        dataFetchers.removeIf(dgsDataFetcher -> dgsDataFetcher.getPsiFile() == psiFile);
+    public Set<DgsScalar> getScalars() {
+        return scalars;
+    }
+
+    public Set<DgsRuntimeWiring> getRuntimeWirings() {
+        return runtimeWirings;
+    }
+
+    public Set<DgsCustomContext> getCustomContexts() {
+        return customContexts;
+    }
+
+    public Set<DgsDirective> getDirectives() {
+        return directives;
+    }
+
+    public Set<DgsDataLoader> getDataLoaders() {
+        return dataLoaders;
     }
 }
