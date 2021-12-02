@@ -21,6 +21,7 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.lang.jsgraphql.psi.*
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.services.DgsService
 
@@ -30,6 +31,7 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
     ) {
         val dgsService = element.project.getService(DgsService::class.java)
+        val psiLeaf = PsiTreeUtil.getDeepestFirst(element)
 
         val iconBuilder = when (element) {
             is GraphQLFieldDefinition -> {
@@ -37,7 +39,7 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
                             .setTargets(it.psiAnnotation)
                             .setTooltipText("Navigate to DGS data fetcher")
-                            .createLineMarkerInfo(element)
+                            .createLineMarkerInfo(psiLeaf)
                 }
             }
             is GraphQLObjectTypeDefinition, is GraphQLObjectTypeExtensionDefinition -> {
@@ -45,7 +47,7 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
                             .setTargets(it.psiAnnotation)
                             .setTooltipText("Navigate to DGS entity fetcher")
-                            .createLineMarkerInfo(element)
+                            .createLineMarkerInfo(psiLeaf)
                 }
             }
             is GraphQLScalarTypeDefinition -> {
@@ -53,7 +55,7 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
                             .setTargets(it.psiAnnotation)
                             .setTooltipText("Navigate to DGS scalar implementation")
-                            .createLineMarkerInfo(element)
+                            .createLineMarkerInfo(psiLeaf)
                 }
             }
             is GraphQLDirectiveDefinition -> {
@@ -61,7 +63,7 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
                             .setTargets(it.psiAnnotation)
                             .setTooltipText("Navigate to DGS directive implementation")
-                            .createLineMarkerInfo(element)
+                            .createLineMarkerInfo(psiLeaf)
                 }
             }
             else -> null

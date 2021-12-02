@@ -78,7 +78,6 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
             StubIndex stubIndex = StubIndex.getInstance();
 
-            long startTime = System.currentTimeMillis();
             DgsComponentIndex dgsComponentIndex = new DgsComponentIndex();
             GraphQLSchemaRegistry graphQLSchemaRegistry = project.getService(GraphQLSchemaRegistry.class);
             var processor = new DgsComponentProcessor(graphQLSchemaRegistry, dgsComponentIndex);
@@ -126,9 +125,6 @@ public class DgsServiceImpl implements DgsService, Disposable {
             cachedComponentIndex = dgsComponentIndex;
 
             ProjectView.getInstance(project).refresh();
-
-            long totalTime = System.currentTimeMillis() - startTime;
-            System.out.println("DGS indexing took " + totalTime + " ms");
 
             return dgsComponentIndex;
         }
