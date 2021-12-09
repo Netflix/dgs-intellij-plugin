@@ -50,26 +50,26 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                         val isJavaFile = dgsDataFetcher?.psiFile is PsiJavaFile
                         val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl)?.argumentsDefinition?.inputValueDefinitionList
                         if (arguments != null && arguments.size > 0 && !node.uastParameters.any { it.hasAnnotation(DGS_INPUT_ARGUMENT_ANNOTATION) }) {
-                            var inputArguments: StringBuilder = java.lang.StringBuilder()
+                            val inputArgumentsHint: String = getHintForInputArgument(arguments[0], isJavaFile)
                             val inputArgumentsList = mutableListOf<String>()
                             arguments.forEach {
                                 val parameter = getHintForInputArgument(it, isJavaFile)
-                                inputArguments.append(" $parameter,")
                                 if (parameter != null) {
                                     inputArgumentsList.add(parameter)
                                 }
                             }
-                            inputArguments.removeSuffix(",")
+
                             val message = MyBundle.getMessage(
                                 "dgs.inspection.dgsinputargument.hint",
-                                inputArguments
+                                inputArgumentsHint
                             )
-                            holder.registerProblem(
-                                    node.parameterList.navigationElement,
-                                message,
-                                ProblemHighlightType.WEAK_WARNING,
-                                DgsInputArgumentQuickFix((node.toUElement() as UMethod), inputArgumentsList, message)
-                            )
+                            node.identifyingElement?.let {
+                                holder.registerProblem(it.navigationElement,
+                                        message,
+                                        ProblemHighlightType.WEAK_WARNING,
+                                        DgsInputArgumentQuickFix((node.toUElement() as UMethod), inputArgumentsList, message)
+                                )
+                            }
                         }
                     }
                 return super.visitMethod(node)
