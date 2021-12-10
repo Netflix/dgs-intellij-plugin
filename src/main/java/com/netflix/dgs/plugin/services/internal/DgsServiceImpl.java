@@ -20,6 +20,7 @@ import com.intellij.ide.projectView.ProjectView;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
@@ -42,7 +43,9 @@ import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.uast.UAnnotation;
 import org.jetbrains.uast.UastContextKt;
 
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DgsServiceImpl implements DgsService, Disposable {
     private final Project project;
@@ -64,6 +67,8 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
     private volatile long javaModificationCount;
     private volatile long kotlinModificationCount;
+    private final AtomicBoolean dependencyFound = new AtomicBoolean(false);
+    private final AtomicBoolean dependenciesProcessed = new AtomicBoolean(false);
 
     @Override
     public DgsComponentIndex getDgsComponentIndex() {
@@ -128,6 +133,23 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
             return dgsComponentIndex;
         }
+    }
+
+    @Override
+    public boolean isDgsProject(Project project) {
+        if(!dependenciesProcessed.get()) {
+            ProjectRootManager.getInstance(project).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
+                if(Objects.requireNonNull(l.getName()).contains("com.netflix.graphql.dgs:graphql-dgs")) {
+                    dependencyFound.set(true);
+                    return false;
+                }
+                return true;
+            });
+
+            dependenciesProcessed.getAndSet(true);
+        }
+
+        return dependencyFound.get();
     }
 
     @Override

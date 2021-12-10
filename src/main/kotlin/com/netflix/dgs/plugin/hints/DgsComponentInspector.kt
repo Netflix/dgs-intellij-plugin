@@ -24,6 +24,7 @@ import com.intellij.uast.UastVisitorAdapter
 import com.intellij.util.castSafelyTo
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.MyBundle
+import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.idea.util.addAnnotation
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtClass
@@ -37,6 +38,11 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
             override fun visitClass(node: UClass): Boolean {
+                val dgsService = node.project.getService(DgsService::class.java)
+                if(!dgsService.isDgsProject(node.project)) {
+                    return false
+                }
+
                 val hasDgsComponentAnnotation: Boolean =
                     node.javaPsi.hasAnnotation("com.netflix.graphql.dgs.DgsComponent")
                 if (Arrays.stream(node.methods)

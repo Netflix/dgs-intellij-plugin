@@ -16,8 +16,12 @@
 
 package com.netflix.dgs.plugin.services;
 
+
+import com.intellij.openapi.project.Project;
+
 public interface DgsService {
     DgsComponentIndex getDgsComponentIndex();
+    boolean isDgsProject(Project project);
 
     void clearCache();
 }

@@ -31,6 +31,9 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
     ) {
         val dgsService = element.project.getService(DgsService::class.java)
+        if(!dgsService.isDgsProject(element.project)) {
+            return
+        }
         val psiLeaf = PsiTreeUtil.getDeepestFirst(element)
 
         val iconBuilder = when (element) {

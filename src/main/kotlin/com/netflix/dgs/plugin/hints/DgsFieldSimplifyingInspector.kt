@@ -26,6 +26,7 @@ import com.intellij.psi.PsiElementVisitor
 import com.intellij.uast.UastVisitorAdapter
 import com.netflix.dgs.plugin.DgsDataFetcher
 import com.netflix.dgs.plugin.MyBundle
+import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.uast.UMethod
@@ -36,6 +37,10 @@ class DgsFieldSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
             override fun visitMethod(method: UMethod): Boolean {
+                val dgsService = method.project.getService(DgsService::class.java)
+                if(!dgsService.isDgsProject(method.project)) {
+                    return false
+                }
 
                 val psiAnnotation = method.annotations.find { DgsDataFetcher.isDataFetcherAnnotation(it) }
                 if (psiAnnotation != null) {
