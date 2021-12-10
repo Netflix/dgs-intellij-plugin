@@ -16,13 +16,9 @@
 
 package com.netflix.dgs.plugin
 
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.openapi.roots.ContentEntry
-import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.testFramework.IdeaTestUtil
 import com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor
-import com.intellij.testFramework.fixtures.MavenDependencyUtil
 
 class DgsProjectDescriptor : DefaultLightProjectDescriptor() {
 

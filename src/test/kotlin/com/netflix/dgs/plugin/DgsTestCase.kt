@@ -31,7 +31,7 @@ abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
     override fun setUp() {
         super.setUp()
 
-        loadLibrary(project, module, "graphql-dgs", "graphql-dgs-4.9.2.jar")
+        loadLibrary(project, module, "com.netflix.graphql.dgs:graphql-dgs", "graphql-dgs-4.9.2.jar")
     }
 
     companion object {

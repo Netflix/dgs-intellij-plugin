@@ -36,15 +36,15 @@ data class DgsEntityFetcher(
             return annotation.qualifiedName == "com.netflix.graphql.dgs.DgsEntityFetcher"
         }
 
-        fun isEntityFetcherAnnotation(annotation: PsiAnnotation): Boolean {
+        private fun isEntityFetcherAnnotation(annotation: PsiAnnotation): Boolean {
             return annotation.qualifiedName == "com.netflix.graphql.dgs.DgsEntityFetcher"
         }
 
-        fun getEntityFetcherAnnotation(method: PsiMethod) =
+        private fun getEntityFetcherAnnotation(method: PsiMethod) =
             (method.annotations.find { a -> isEntityFetcherAnnotation(a) }
                 ?: throw IllegalArgumentException("Method ${method.name} is not an entity fetcher"))
 
-        fun getNameFromAnnotation(annotation: PsiAnnotation): String? {
+        private fun getNameFromAnnotation(annotation: PsiAnnotation): String? {
             return (annotation.toUElement() as UAnnotation).findAttributeValue("name")?.evaluateString()
         }
 

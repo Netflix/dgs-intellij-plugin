@@ -37,6 +37,7 @@ import java.util.*
 class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
+            @Suppress("UElementAsPsi")
             override fun visitClass(node: UClass): Boolean {
                 val dgsService = node.project.getService(DgsService::class.java)
                 if(!dgsService.isDgsProject(node.project)) {
