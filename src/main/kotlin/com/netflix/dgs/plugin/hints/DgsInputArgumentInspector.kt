@@ -20,7 +20,6 @@ import com.intellij.codeInspection.*
 import com.intellij.lang.jsgraphql.psi.*
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLFieldDefinitionImpl
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
-import com.intellij.lang.jsgraphql.psi.impl.GraphQLTypeNameImpl
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
@@ -31,12 +30,11 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.kotlin.util.removeSuffixIfPresent
-import org.jetbrains.uast.*
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
-import java.time.*
-import java.util.*
-import kotlin.system.measureTimeMillis
 
+@Suppress("UElementAsPsi")
 class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
 
@@ -45,29 +43,31 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
 
                     if (hasDgsAnnotation(node) ) {
                         val dgsDataAnnotation = getDgsAnnotation(node)
-                        val dgsService = dgsDataAnnotation?.project?.getService(DgsService::class.java)
+                        val dgsService = dgsDataAnnotation.project.getService(DgsService::class.java)
                         val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
                         val isJavaFile = dgsDataFetcher?.psiFile is PsiJavaFile
-                        val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl)?.argumentsDefinition?.inputValueDefinitionList
+                        val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
                         if (arguments != null && arguments.size > 0 && !node.uastParameters.any { it.hasAnnotation(DGS_INPUT_ARGUMENT_ANNOTATION) }) {
                             val inputArgumentsHint: String = getHintForInputArgument(arguments[0], isJavaFile)
                             val inputArgumentsList = mutableListOf<String>()
                             arguments.forEach {
                                 val parameter = getHintForInputArgument(it, isJavaFile)
-                                if (parameter != null) {
-                                    inputArgumentsList.add(parameter)
-                                }
+                                inputArgumentsList.add(parameter)
                             }
 
                             val message = MyBundle.getMessage(
                                 "dgs.inspection.dgsinputargument.hint",
                                 inputArgumentsHint
                             )
+
+
+                            val pointer = SmartPointerManager.createPointer(node.toUElement() as UMethod)
+
                             node.identifyingElement?.let {
                                 holder.registerProblem(it.navigationElement,
                                         message,
                                         ProblemHighlightType.WEAK_WARNING,
-                                        DgsInputArgumentQuickFix((node.toUElement() as UMethod), inputArgumentsList, message)
+                                        DgsInputArgumentQuickFix(pointer, inputArgumentsList, message)
                                 )
                             }
                         }
@@ -87,7 +87,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
 
     private fun getHintForInputArgumentInJava(input: GraphQLInputValueDefinition) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
-        var inputArgumentHint = StringBuilder("@InputArgument ")
+        val inputArgumentHint = StringBuilder("@InputArgument ")
         if (input.type is GraphQLListType) {
             val collectionType = getCollectionType(input.type, true)
             if (! isSimpleType(collectionType)) {
@@ -100,7 +100,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
 
     private fun getHintForInputArgumentInKotlin(input: GraphQLInputValueDefinition) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
-        var inputArgumentHint = StringBuilder("@InputArgument ")
+        val inputArgumentHint = StringBuilder("@InputArgument ")
         if (input.type is GraphQLListType) {
             val collectionType = getCollectionType(input.type, false)
             if (! isSimpleType(collectionType)) {
@@ -112,7 +112,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     }
 
     private fun isSimpleType(typeName: String) : Boolean {
-        return typeName.equals("String") || typeName.equals("Integer") || typeName.equals("Int") || typeName.equals("Boolean") || typeName.equals("Double")
+        return typeName == "String" || typeName == "Integer" || typeName == "Int" || typeName == "Boolean" || typeName == "Double"
     }
 
     private fun getType(inputType: GraphQLType?, isJavaType: Boolean) : String {
@@ -196,10 +196,10 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     }
 
     companion object {
-        const val DGS_DATA_ANNOTATION = "com.netflix.graphql.dgs.DgsData"
-        const val DGS_QUERY_ANNOTATION = "com.netflix.graphql.dgs.DgsQuery"
-        const val DGS_MUTATION_ANNOTATION = "com.netflix.graphql.dgs.DgsMutation"
-        const val DGS_SUBSCRIPTION_ANNOTATION = "com.netflix.graphql.dgs.DgsSubscription"
+        private const val DGS_DATA_ANNOTATION = "com.netflix.graphql.dgs.DgsData"
+        private const val DGS_QUERY_ANNOTATION = "com.netflix.graphql.dgs.DgsQuery"
+        private const val DGS_MUTATION_ANNOTATION = "com.netflix.graphql.dgs.DgsMutation"
+        private const val DGS_SUBSCRIPTION_ANNOTATION = "com.netflix.graphql.dgs.DgsSubscription"
         const val DGS_INPUT_ARGUMENT_ANNOTATION = "com.netflix.graphql.dgs.InputArgument"
 
         fun hasDgsAnnotation(node: UMethod) : Boolean {
@@ -222,7 +222,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     }
 
 
-    class DgsInputArgumentQuickFix(private val method: UMethod, private val newInputArguments: List<String>, private val fixName: String) : LocalQuickFix {
+    class DgsInputArgumentQuickFix(private val methodPointer: SmartPsiElementPointer<UMethod>, private val newInputArguments: List<String>, private val fixName: String) : LocalQuickFix {
         override fun getFamilyName(): String {
             return name
         }
@@ -232,6 +232,12 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
         }
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+
+            val method = methodPointer.element
+            if(method == null) {
+                return
+            }
+
             val file = descriptor.psiElement.parentOfType<PsiFile>()
 
             if(file is PsiJavaFile) {
@@ -242,10 +248,10 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                 }
                 project.getService(DgsService::class.java).clearCache()
             } else if(file is KtFile) {
-                val psiFactory: KtPsiFactory = KtPsiFactory(project)
+                val psiFactory = KtPsiFactory(project)
                 newInputArguments.forEach {
                     val param = psiFactory.createParameter(it)
-                    (method.sourcePsi as KtFunction).valueParameterList?.addParameter(param)
+                        (method.sourcePsi as KtFunction).valueParameterList?.addParameter(param)
                 }
             }
         }

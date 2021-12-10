@@ -106,7 +106,7 @@ class DgsComponentProcessor(
         }
     }
 
-    fun processEntityFetcher(uMethod: UMethod, uAnnotation: UAnnotation) {
+    private fun processEntityFetcher(uMethod: UMethod, uAnnotation: UAnnotation) {
         val field = DgsEntityFetcher.getName(uMethod)
 
         val dgsEntityFetcher = DgsEntityFetcher(
