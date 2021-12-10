@@ -34,13 +34,17 @@ class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
         element: PsiElement,
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
     ) {
+        val dgsService = element.project.getService(DgsService::class.java)
+        if(!dgsService.isDgsProject(element.project)) {
+            return
+        }
+
         val uElement = element.toUElement()
 
         if (uElement is UAnnotation) {
 
             if (DgsDataFetcher.isDataFetcherAnnotation(uElement) || DgsEntityFetcher.isEntityFetcherAnnotation(uElement)) {
 
-                val dgsService = element.project.getService(DgsService::class.java)
                 val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation == element }
                 val dgsEntityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.psiAnnotation == element }
 

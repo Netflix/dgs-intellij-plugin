@@ -16,33 +16,29 @@
 
 package com.netflix.dgs.plugin.hints
 
-import com.intellij.codeInspection.*
+import com.intellij.codeInspection.LocalInspectionTool
+import com.intellij.codeInspection.ProblemHighlightType
+import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.lang.jsgraphql.psi.GraphQLDirective
-import com.intellij.lang.jsgraphql.psi.GraphQLIdentifier
 import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeDefinition
 import com.intellij.lang.jsgraphql.psi.GraphQLObjectTypeExtensionDefinition
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLDirectiveImpl
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
-import com.intellij.openapi.project.Project
-import com.intellij.psi.*
-import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.parentOfType
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiElementVisitor
 import com.netflix.dgs.plugin.MyBundle
 import com.netflix.dgs.plugin.services.DgsService
-import org.jetbrains.kotlin.idea.util.addAnnotation
-import org.jetbrains.kotlin.js.translate.utils.finalElement
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.uast.*
 
 
 class DgsEntityFetcherInspector : LocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-
         return object : PsiElementVisitor() {
             override fun visitElement(element: PsiElement) {
                 val dgsService = element.project.getService(DgsService::class.java)
+                if(!dgsService.isDgsProject(element.project)) {
+                    return
+                }
+
                 var directives: List<GraphQLDirective> = emptyList()
                 if (element is GraphQLObjectTypeDefinition) {
                     directives = element.directives

@@ -39,8 +39,11 @@ class DgsProjectStructureProvider : TreeStructureProvider {
         children: MutableCollection<AbstractTreeNode<*>>,
         settings: ViewSettings?
     ): MutableCollection<AbstractTreeNode<*>> {
-        if (parent.parent == null) {
-            children.add(DgsComponentsRootNode(parent.project, settings))
+        val dgsService = parent.project?.getService(DgsService::class.java)
+        if(dgsService?.isDgsProject(parent.project) == true) {
+            if (parent.parent == null) {
+                children.add(DgsComponentsRootNode(parent.project, settings))
+            }
         }
 
         return children

@@ -37,6 +37,12 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
 
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
             override fun visitMethod(node: UMethod): Boolean {
+                val dgsService = node.project.getService(DgsService::class.java)
+                if(!dgsService.isDgsProject(node.project)) {
+                    return false
+                }
+
+                val time = measureTimeMillis {
 
                     if (node.hasAnnotation(DGS_DATA_ANNOTATION)) {
                         val dgsDataAnnotation = node.getAnnotation(DGS_DATA_ANNOTATION)

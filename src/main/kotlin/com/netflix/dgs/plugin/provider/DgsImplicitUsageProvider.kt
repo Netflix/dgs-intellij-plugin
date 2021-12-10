@@ -35,11 +35,17 @@ package com.netflix.dgs.plugin.provider
 import com.intellij.codeInsight.daemon.ImplicitUsageProvider
 import com.intellij.psi.PsiElement
 import com.netflix.dgs.plugin.DgsConstants
+import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.toUElement
 
 class DgsImplicitUsageProvider: ImplicitUsageProvider {
     override fun isImplicitUsage(element: PsiElement): Boolean {
+        val dgsService = element.project.getService(DgsService::class.java)
+        if(!dgsService.isDgsProject(element.project)) {
+            return false
+        }
+
         val uElement = element.toUElement()
         if(uElement is UMethod) {
             return uElement.annotations.any { DgsConstants.dgsAnnotations.contains(it.qualifiedName) }
