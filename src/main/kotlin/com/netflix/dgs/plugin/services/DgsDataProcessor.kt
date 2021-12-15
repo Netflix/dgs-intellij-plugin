@@ -16,14 +16,12 @@
 
 package com.netflix.dgs.plugin.services
 
+import com.intellij.psi.PsiAnnotation
 import com.intellij.util.Processor
 import com.intellij.util.containers.orNull
 import com.netflix.dgs.plugin.*
 import com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry
-import org.jetbrains.uast.UAnnotation
-import org.jetbrains.uast.UClass
-import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.*
 
 class DgsComponentProcessor(
     private val graphQLSchemaRegistry: GraphQLSchemaRegistry,

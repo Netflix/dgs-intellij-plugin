@@ -54,7 +54,7 @@ data class DgsDataFetcher(
                 "com.netflix.graphql.dgs.DgsMutation" -> "Mutation"
                 "com.netflix.graphql.dgs.DgsSubscription" -> "Subscription"
                 "com.netflix.graphql.dgs.DgsData" -> (annotation.toUElement() as UAnnotation).findAttributeValue("parentType")
-                    ?.evaluateString()
+                        ?.evaluateString()
                 else -> throw IllegalArgumentException("Annotation ${annotation.qualifiedName} is not a data fetcher annotation")
             }
         }
