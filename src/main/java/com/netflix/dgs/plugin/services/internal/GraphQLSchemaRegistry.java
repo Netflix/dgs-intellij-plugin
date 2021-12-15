@@ -39,18 +39,24 @@ public class GraphQLSchemaRegistry {
     Optional<PsiElement> psiForSchemaType(@NotNull PsiElement psiElement, @Nullable String parentType, @Nullable String field) {
 
         TypeDefinitionRegistry registry = getRegistry(psiElement);
-        ObjectTypeDefinition type = getTypeDefinition(registry, parentType);
-        if (type != null) {
-            Optional<FieldDefinition> schemaField = type.getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
+        Optional<ObjectTypeDefinition> objectType = getTypeDefinition(registry, parentType);
+        if (objectType.isPresent()) {
+            Optional<FieldDefinition> schemaField = objectType.get().getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
             if (schemaField.isPresent()) {
                 return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
             }
         } else if ("_entities".equals(parentType)) {
-            type = getTypeDefinition(registry, field);
-            if (type != null) {
-                return Optional.ofNullable(type.getElement());
-            } else {
-                return Optional.empty();
+            Optional<ObjectTypeDefinition> entitiesType = getTypeDefinition(registry, field);
+            if (entitiesType.isPresent()) {
+                return Optional.ofNullable(entitiesType.get().getElement());
+            }
+        } else {
+            Optional<InterfaceTypeDefinition> interfaceType = getInterfaceTypeDefinition(registry, parentType);
+            if (interfaceType.isPresent()) {
+                Optional<FieldDefinition> schemaField = interfaceType.get().getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
+                if (schemaField.isPresent()) {
+                    return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
+                }
             }
         }
 
@@ -73,19 +79,30 @@ public class GraphQLSchemaRegistry {
         }
     }
 
-    private ObjectTypeDefinition getTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
+    private Optional<ObjectTypeDefinition> getTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
+        Optional<ObjectTypeDefinition> objectTypeDefinition = registry.getType(schemaType, ObjectTypeDefinition.class);
+        if (objectTypeDefinition.isPresent()) {
+            return Optional.ofNullable(objectTypeDefinition.get());
+        }
 
         List<ObjectTypeExtensionDefinition> objectTypeExtensionDefinitions = registry.objectTypeExtensions().get(schemaType);
-        ObjectTypeDefinition objectType = null;
         if (objectTypeExtensionDefinitions != null && !objectTypeExtensionDefinitions.isEmpty()) {
-            objectType = objectTypeExtensionDefinitions.get(0);
-        } else {
-            Optional<ObjectTypeDefinition> objectTypeDefinition = registry.getType(schemaType, ObjectTypeDefinition.class);
-            if (objectTypeDefinition.isPresent()) {
-                objectType = objectTypeDefinition.get();
-            }
+            return  Optional.ofNullable(objectTypeExtensionDefinitions.get(0));
         }
-        return objectType;
+        return Optional.empty();
+    }
+
+    private Optional<InterfaceTypeDefinition> getInterfaceTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
+        Optional<InterfaceTypeDefinition> interfaceTypeDefinition = registry.getType(schemaType, InterfaceTypeDefinition.class);
+        if (interfaceTypeDefinition.isPresent()) {
+            return Optional.ofNullable(interfaceTypeDefinition.get());
+        }
+
+        List<InterfaceTypeExtensionDefinition> interfaceTypeExtensionDefinitions = registry.interfaceTypeExtensions().get(schemaType);
+        if (interfaceTypeExtensionDefinitions != null && !interfaceTypeExtensionDefinitions.isEmpty()) {
+            return  Optional.ofNullable(interfaceTypeExtensionDefinitions.get(0));
+        }
+        return Optional.empty();
     }
 
     private TypeDefinitionRegistry getRegistry(@NotNull PsiElement psiElement) {

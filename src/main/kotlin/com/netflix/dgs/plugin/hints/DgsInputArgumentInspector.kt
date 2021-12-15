@@ -45,30 +45,30 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                         val dgsDataAnnotation = getDgsAnnotation(node)
                         val dgsService = dgsDataAnnotation.project.getService(DgsService::class.java)
                         val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
-                        val isJavaFile = dgsDataFetcher?.psiFile is PsiJavaFile
-                        val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
-                        if (arguments != null && arguments.size > 0 && !node.uastParameters.any { it.hasAnnotation(DGS_INPUT_ARGUMENT_ANNOTATION) }) {
-                            val inputArgumentsHint: String = getHintForInputArgument(arguments[0], isJavaFile)
-                            val inputArgumentsList = mutableListOf<String>()
-                            arguments.forEach {
-                                val parameter = getHintForInputArgument(it, isJavaFile)
-                                inputArgumentsList.add(parameter)
-                            }
+                        if (dgsDataFetcher?.schemaPsi != null) {
+                            val isJavaFile = dgsDataFetcher?.psiFile is PsiJavaFile
+                            val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
+                            if (arguments != null && arguments.size > 0 && !node.uastParameters.any { it.hasAnnotation(DGS_INPUT_ARGUMENT_ANNOTATION) }) {
+                                val inputArgumentsHint: String = getHintForInputArgument(arguments[0], isJavaFile)
+                                val inputArgumentsList = mutableListOf<String>()
+                                arguments.forEach {
+                                    val parameter = getHintForInputArgument(it, isJavaFile)
+                                    inputArgumentsList.add(parameter)
+                                }
 
-                            val message = MyBundle.getMessage(
-                                "dgs.inspection.dgsinputargument.hint",
-                                inputArgumentsHint
-                            )
-
-
-                            val pointer = SmartPointerManager.createPointer(node.toUElement() as UMethod)
-
-                            node.identifyingElement?.let {
-                                holder.registerProblem(it.navigationElement,
-                                        message,
-                                        ProblemHighlightType.WEAK_WARNING,
-                                        DgsInputArgumentQuickFix(pointer, inputArgumentsList, message)
+                                val message = MyBundle.getMessage(
+                                    "dgs.inspection.dgsinputargument.hint",
+                                    inputArgumentsHint
                                 )
+
+                                val pointer = SmartPointerManager.createPointer(node.toUElement() as UMethod)
+                                node.identifyingElement?.let {
+                                    holder.registerProblem(it.navigationElement,
+                                            message,
+                                            ProblemHighlightType.WEAK_WARNING,
+                                            DgsInputArgumentQuickFix(pointer, inputArgumentsList, message)
+                                    )
+                                }
                             }
                         }
                     }
