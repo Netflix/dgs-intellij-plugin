@@ -50,13 +50,13 @@ class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
 
                 if (dgsDataFetcher?.schemaPsi != null || dgsEntityFetcher?.schemaPsi != null) {
 
-                    val psiIdentifier = PsiTreeUtil.findChildOfType(element, PsiIdentifier::class.java)?:element
+                    val psiLeaf = PsiTreeUtil.getDeepestFirst(element)
                     val target = dgsDataFetcher?.schemaPsi?: dgsEntityFetcher!!.schemaPsi
                     val builder =
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
                             .setTargets(target)
                             .setTooltipText("Navigate to GraphQL schema type")
-                            .createLineMarkerInfo(psiIdentifier)
+                            .createLineMarkerInfo(psiLeaf)
 
                     result.add(builder)
                 }
