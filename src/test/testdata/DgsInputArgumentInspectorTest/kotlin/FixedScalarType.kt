@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package com.netflix.dgs.plugin
+import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsData;
+import com.netflix.graphql.dgs.DgsQuery;
 
-import com.netflix.dgs.plugin.hints.DgsEntityFetcherInspector
-
-class DgsEntityFetcherInspectorTest : DgsTestCase() {
-
-
-    fun testMissingEntityFetcher() {
-        myFixture.configureByFiles("FederatedEntity.graphql", "MissingDgsEntityFetcher.java")
-        myFixture.enableInspections(DgsEntityFetcherInspector::class.java)
-
-        myFixture.checkHighlighting(true, false, true, true)
+@DgsComponent
+class MissingScalarType {
+    @DgsQuery
+    fun testScalarType (@InputArgument testScalar: OffsetDateTime?) : Boolean {
+        return true;
     }
 }

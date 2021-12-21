@@ -88,7 +88,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     private fun getHintForInputArgumentInJava(input: GraphQLInputValueDefinition) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
         val inputArgumentHint = StringBuilder("@InputArgument ")
-        if (input.type is GraphQLListType) {
+        if (isListType(input.type)) {
             val collectionType = getCollectionType(input.type, true)
             if (! isSimpleType(collectionType)) {
                 inputArgumentHint.append("(collectionType=$collectionType.class) ")
@@ -101,7 +101,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     private fun getHintForInputArgumentInKotlin(input: GraphQLInputValueDefinition) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
         val inputArgumentHint = StringBuilder("@InputArgument ")
-        if (input.type is GraphQLListType) {
+        if (isListType(input.type)) {
             val collectionType = getCollectionType(input.type, false)
             if (! isSimpleType(collectionType)) {
                 inputArgumentHint.append("(collectionType=$collectionType) ")
@@ -113,6 +113,17 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
 
     private fun isSimpleType(typeName: String) : Boolean {
         return typeName == "String" || typeName == "Integer" || typeName == "Int" || typeName == "Boolean" || typeName == "Double"
+    }
+
+    private fun isListType(inputType: GraphQLType?) : Boolean {
+        return when (inputType) {
+            is GraphQLTypeName -> false
+            is GraphQLListType -> true
+            is GraphQLNonNullType -> {
+                return isListType(inputType.type)
+            }
+            else -> false
+        }
     }
 
     private fun getType(inputType: GraphQLType?, isJavaType: Boolean) : String {
@@ -151,10 +162,10 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                 getRawType((inputType as PsiNamedElement).name!!, isJavaFile)
             }
             is GraphQLListType -> {
-                getType(inputType.type, isJavaFile)
+                getCollectionType(inputType.type, isJavaFile)
             }
             is GraphQLNonNullType -> {
-                getType(inputType.type, isJavaFile)
+                getCollectionType(inputType.type, isJavaFile)
             }
             else -> ""
         }
@@ -233,13 +244,9 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
 
-            val method = methodPointer.element
-            if(method == null) {
-                return
-            }
+            val method = methodPointer.element ?: return
 
-            val file = descriptor.psiElement.parentOfType<PsiFile>()
-
+            val file = methodPointer.element?.sourcePsi?.parentOfType<PsiFile>()
             if(file is PsiJavaFile) {
                 val factory: PsiElementFactory = JavaPsiFacade.getInstance(project).elementFactory
                 newInputArguments.forEach {
