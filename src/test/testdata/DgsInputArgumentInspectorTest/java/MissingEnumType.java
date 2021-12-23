@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 public class MissingEnumType {
     @DgsQuery
-    public boolean <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument Colors testEnum">testEnumType<caret></weak_warning> () {
+    public boolean <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=Colors.class) Colors testEnum">testEnumType<caret></weak_warning> () {
         return true;
     }
 }

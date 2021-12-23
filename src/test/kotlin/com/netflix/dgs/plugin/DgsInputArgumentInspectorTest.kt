@@ -61,7 +61,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument Colors testEnum"))
+        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=Colors.class) Colors testEnum"))
         myFixture.checkResultByFile("java/FixedEnumType.java")
     }
 
@@ -70,7 +70,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument testEnum: Colors?"))
+        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=Colors) testEnum: Colors?"))
         myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
     }
 
