@@ -85,8 +85,6 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
     private fun hasExpectedAnnotation(graphQLInput: GraphQLInputValueDefinition, inputArgument: UParameter, typeDefinitionRegistry: TypeDefinitionRegistry, isJavaFile: Boolean) : Boolean {
         val inputArgumentAnnotation = inputArgument.getAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION)
         if (inputArgumentAnnotation != null) {
-            // turn off the hint for custom scalars
-
             // check whether collection type matches, if it exists
             val expectedInputArgumentHint = InputArgumentUtils.getHintForInputArgument(graphQLInput, typeDefinitionRegistry, isJavaFile)
             if (expectedInputArgumentHint.contains("collectionType")) {
