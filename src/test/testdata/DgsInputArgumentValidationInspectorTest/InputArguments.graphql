@@ -1,0 +1,23 @@
+type Query {
+    testNoArgs: Boolean
+    testSimpleTypes(testString: String, testInteger: Int, testFloat: Float, testBoolean: Boolean): Boolean
+    testSimpleNonNullableTypes(testString: String!, testInteger: Int!, testFloat: Float!, testBoolean: Boolean!): Boolean
+    testEnumType(testEnum: Colors): Boolean
+    testComplexType(testInput: TestInput, testNonNullableInput: TestInput!): Boolean
+    testCollectionType(testInput: [TestInput], testNonNullableInput: [TestInput!]!): Boolean
+    testSimpleListTypes(testStrings: [String], testNonNullableStrings: [String!]!): Boolean
+    testScalarType(testScalar: DateTime): Boolean
+}
+
+enum Colors {
+    red,
+    blue,
+    green
+}
+
+input TestInput {
+    name: String!
+    address: String
+}
+
+scalar DateTime
