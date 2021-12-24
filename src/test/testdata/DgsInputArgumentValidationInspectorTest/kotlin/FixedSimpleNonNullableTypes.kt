@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsData;
-import com.netflix.graphql.dgs.DgsQuery;
-import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsData
+import com.netflix.graphql.dgs.DgsQuery
+import com.netflix.graphql.dgs.InputArgument
 
 @DgsComponent
-public class IncorrectSimpleTypes {
+class IncorrectSimpleNonNullableTypes {
     @DgsQuery
-    public boolean testSimpleTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument String testString">@InputArgument Integer testString</weak_warning><caret>) {
+    fun testSimpleNonNullableTypes(@InputArgument testInteger: Int) : Boolean {
         return true;
     }
 }

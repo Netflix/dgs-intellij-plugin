@@ -22,8 +22,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class IncorrectSimpleTypes {
     @DgsQuery
-    fun testSimpleTypes(@InputArgument testString: String?,
-                        @InputArgument testInteger: Int?) : Boolean {
+    fun testSimpleTypes(@InputArgument testString: String?) : Boolean {
         return true;
     }
 }
