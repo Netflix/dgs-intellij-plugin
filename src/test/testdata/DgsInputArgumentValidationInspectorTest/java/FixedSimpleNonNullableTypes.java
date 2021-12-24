@@ -19,13 +19,10 @@ import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
 
-import java.lang.*;
-
 @DgsComponent
-public class IncorrectSimpleTypes {
+public class IncorrectSimpleNonNullableTypes {
     @DgsQuery
-    public boolean testSimpleNonNullableTypes(@InputArgument String testString,
-                                              @InputArgument Integer testInteger) {
+    public boolean testSimpleListTypes(@InputArgument List<Integer> testInteger) {
         return true;
     }
 }

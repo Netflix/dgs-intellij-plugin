@@ -19,13 +19,10 @@ import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
 
-import java.lang.*;
-
 @DgsComponent
-public class IncorrectSimpleTypes {
+public class IncorrectSimpleNonNullableTypes {
     @DgsQuery
-    public boolean testSimpleNonNullableTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument String testString">@InputArgument String testString</weak_warning><caret>,
-                                   @InputArgument Integer testInteger) {
+    public boolean testSimpleNonNullableTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument Integer testInteger">@InputArgument String testInteger</weak_warning><caret>) {
         return true;
     }
 }

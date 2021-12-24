@@ -22,8 +22,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class IncorrectSimpleTypes {
     @DgsQuery
-    fun testSimpleTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testString: String?">@InputArgument testString: Int?</weak_warning><caret>,
-        @InputArgument testInteger: Int?) : Boolean {
+    fun testSimpleTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testString: String?">@InputArgument testString: Int?</weak_warning><caret>) : Boolean {
         return true;
     }
 }

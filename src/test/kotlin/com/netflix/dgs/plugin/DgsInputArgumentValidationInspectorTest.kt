@@ -20,12 +20,12 @@ import com.netflix.dgs.plugin.hints.DgsInputArgumentValidationInspector
 
 class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
-    /*fun testIncorrectInputArgumentSimpleTypes() {
+    fun testIncorrectInputArgumentSimpleTypes() {
         myFixture.configureByFiles("java/IncorrectSimpleTypes.java", "InputArguments.graphql")
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("@InputArgument type does not match the schema, expected @InputArgument String testString"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument String testString"))
         myFixture.checkResultByFile("java/FixedSimpleTypes.java")
     }
 
@@ -34,7 +34,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("@InputArgument type does not match the schema, expected @InputArgument testString: String?"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testString: String?"))
         myFixture.checkResultByFile("kotlin/FixedSimpleTypes.kt")
     }
 
@@ -43,7 +43,16 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("\"@InputArgument type does not match the schema, expected @InputArgument String testString\""))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument Integer testInteger"))
         myFixture.checkResultByFile("java/FixedSimpleNonNullableTypes.java")
-    }*/
+    }
+
+    fun testIncorrectInputArgumentSimpleNonNullableTypesForKotlin() {
+        myFixture.configureByFiles("kotlin/IncorrectSimpleNonNullableTypes.kt", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testInteger: Int"))
+        myFixture.checkResultByFile("kotlin/FixedSimpleNonNullableTypes.kt")
+    }
 }
