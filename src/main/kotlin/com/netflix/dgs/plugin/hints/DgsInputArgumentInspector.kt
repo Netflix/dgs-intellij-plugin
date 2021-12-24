@@ -53,8 +53,11 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                                 val inputArgumentsHint: String = InputArgumentUtils.getHintForInputArgument(arguments[0], typeDefinitionRegistry,  isJavaFile)
                                 val inputArgumentsList = mutableListOf<String>()
                                 arguments.forEach {
-                                    val parameter = InputArgumentUtils.getHintForInputArgument(it, typeDefinitionRegistry, isJavaFile)
-                                    inputArgumentsList.add(parameter)
+                                    // do not add a hint for custom scalar types
+                                    if (! InputArgumentUtils.isCustomScalarType(it.type!!, typeDefinitionRegistry)) {
+                                        val parameter = InputArgumentUtils.getHintForInputArgument(it, typeDefinitionRegistry, isJavaFile)
+                                        inputArgumentsList.add(parameter)
+                                    }
                                 }
 
                                 val message = MyBundle.getMessage(

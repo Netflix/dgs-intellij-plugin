@@ -19,6 +19,7 @@ package com.netflix.dgs.plugin
 import com.intellij.lang.jsgraphql.psi.*
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.lang.jsgraphql.types.language.EnumTypeDefinition
+import com.intellij.lang.jsgraphql.types.language.ScalarTypeDefinition
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiNamedElement
@@ -32,6 +33,28 @@ object InputArgumentUtils {
     private const val DGS_MUTATION_ANNOTATION = "com.netflix.graphql.dgs.DgsMutation"
     private const val DGS_SUBSCRIPTION_ANNOTATION = "com.netflix.graphql.dgs.DgsSubscription"
     const val DGS_INPUT_ARGUMENT_ANNOTATION = "com.netflix.graphql.dgs.InputArgument"
+
+    private val knownTypes = mapOf("String" to "String",
+        "StringValue" to "String",
+        "Float" to "Double",
+        "FloatValue" to "Double",
+        "Boolean" to "Boolean",
+        "BooleanValue" to "Boolean",
+        "ID" to "String",
+        "IDValue" to "String",
+        "LocalTime" to "LocalTime",
+        "LocalDate" to "LocalDate",
+        "LocalDateTime" to "LocalDateTime",
+        "TimeZone" to "String",
+        "Date" to "LocalDate",
+        "DateTime" to "OffsetDateTime",
+        "Time" to "OffsetTime",
+        "Currency" to "Currency",
+        "Instant" to "Instant",
+        "RelayPageInfo" to "PageInfo",
+        "PageInfo" to "PageInfo",
+        "JSON" to "Object",
+        "Url" to "URL")
 
     fun hasDgsAnnotation(node: UMethod) : Boolean {
         return(node.hasAnnotation(DGS_QUERY_ANNOTATION) || node.hasAnnotation(DGS_SUBSCRIPTION_ANNOTATION) || node.hasAnnotation(DGS_MUTATION_ANNOTATION)
@@ -62,26 +85,28 @@ object InputArgumentUtils {
     private fun getHintForInputArgumentInJava(input: GraphQLInputValueDefinition, typeRegistry: TypeDefinitionRegistry) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
         val inputArgumentHint = StringBuilder("@InputArgument ")
-        if (isListType(input.type) || isEnumType(input.type, typeRegistry)) {
-            val collectionType = getCollectionType(input.type, true)
-            if (! isSimpleType(collectionType)) {
+
+        if (isListType(input.type!!) || isEnumType(input.type!!, typeRegistry)) {
+            val collectionType = getCollectionType(input.type!!, true)
+            if (!isSimpleType(collectionType)) {
                 inputArgumentHint.append("(collectionType=$collectionType.class) ")
             }
         }
-        inputArgumentHint.append(getType(input.type, true)  + " " + argName)
+        inputArgumentHint.append(getType(input.type!!, true) + " " + argName)
         return inputArgumentHint.toString()
+
     }
 
     private fun getHintForInputArgumentInKotlin(input: GraphQLInputValueDefinition, typeRegistry: TypeDefinitionRegistry) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
         val inputArgumentHint = StringBuilder("@InputArgument ")
-        if (isListType(input.type) || isEnumType(input.type, typeRegistry)) {
-            val collectionType = getCollectionType(input.type, false)
+        if (isListType(input.type!!) || isEnumType(input.type!!, typeRegistry)) {
+            val collectionType = getCollectionType(input.type!!, false)
             if (! isSimpleType(collectionType)) {
                 inputArgumentHint.append("(collectionType=$collectionType) ")
             }
         }
-        inputArgumentHint.append(argName + ": "+ getType(input.type, false)  + " ")
+        inputArgumentHint.append(argName + ": "+ getType(input.type!!, false)  + " ")
         return inputArgumentHint.toString()
     }
 
@@ -89,7 +114,7 @@ object InputArgumentUtils {
         return typeName == "String" || typeName == "Integer" || typeName == "Int" || typeName == "Boolean" || typeName == "Double"
     }
 
-    private fun isEnumType(inputType: GraphQLType?, typeRegistry: TypeDefinitionRegistry) : Boolean {
+    private fun isEnumType(inputType: GraphQLType, typeRegistry: TypeDefinitionRegistry) : Boolean {
         if (inputType is GraphQLTypeName) {
             val type = typeRegistry.types()[(inputType as PsiNamedElement).name]
             return type != null && type is EnumTypeDefinition || typeRegistry.enumTypeExtensions().containsKey((inputType as PsiNamedElement).name)
@@ -97,7 +122,18 @@ object InputArgumentUtils {
         return false
     }
 
-    private fun isListType(inputType: GraphQLType?) : Boolean {
+    fun isCustomScalarType(inputType: GraphQLType, typeRegistry: TypeDefinitionRegistry) : Boolean {
+        if (inputType is GraphQLTypeName) {
+            val inputTypeName = (inputType as PsiNamedElement).name!!
+            if (knownTypes.containsKey(inputTypeName)) {
+                return false
+            }
+            return typeRegistry.scalars().contains(inputTypeName) ||  typeRegistry.scalarTypeExtensions().containsKey(inputTypeName)
+        }
+        return false
+    }
+
+    private fun isListType(inputType: GraphQLType) : Boolean {
         return when (inputType) {
             is GraphQLTypeName -> false
             is GraphQLListType -> true
@@ -108,7 +144,7 @@ object InputArgumentUtils {
         }
     }
 
-    fun getType(inputType: GraphQLType?, isJavaType: Boolean) : String {
+    fun getType(inputType: GraphQLType, isJavaType: Boolean) : String {
         return when (inputType) {
             is GraphQLTypeName -> {
                 val rawType = getRawType((inputType as PsiNamedElement).name!!, isJavaType)
@@ -138,7 +174,7 @@ object InputArgumentUtils {
         }
     }
 
-    fun getCollectionType(inputType: GraphQLType?, isJavaFile: Boolean) : String {
+    fun getCollectionType(inputType: GraphQLType, isJavaFile: Boolean) : String {
         return when (inputType) {
             is GraphQLTypeName -> {
                 getRawType((inputType as PsiNamedElement).name!!, isJavaFile)
@@ -154,36 +190,16 @@ object InputArgumentUtils {
     }
 
     private fun getRawType(typeName: String, isJavaFile: Boolean) : String {
-
         if ( isJavaFile && (typeName == "Int" || typeName == "IntValue")) {
             return "Integer"
         } else if (typeName == "Int" || typeName == "IntValue") {
             return "Int"
         }
 
-        val type = when (typeName) {
-            "String" -> "String"
-            "StringValue" -> "String"
-            "Float" -> "Double"
-            "FloatValue" -> "Double"
-            "Boolean" -> "Boolean"
-            "BooleanValue" -> "Boolean"
-            "ID" -> "String"
-            "IDValue" -> "String"
-            "LocalTime" -> "LocalTime"
-            "LocalDate" -> "LocalDate"
-            "LocalDateTime" -> "LocalDateTime"
-            "TimeZone" -> "String"
-            "Date" -> "LocalDate"
-            "DateTime" -> "OffsetDateTime"
-            "Time" -> "OffsetTime"
-            "Currency" -> "Currency"
-            "Instant" -> "Instant"
-            "RelayPageInfo" -> "PageInfo"
-            "PageInfo" -> "PageInfo"
-            "JSON" -> "Object"
-            "Url" -> "URL"
-            else -> typeName
+        val type = if (knownTypes.containsKey(typeName)) {
+            knownTypes[typeName]!!
+        } else {
+            typeName
         }
         return type
     }
