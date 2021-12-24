@@ -55,4 +55,31 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testInteger: Int"))
         myFixture.checkResultByFile("kotlin/FixedSimpleNonNullableTypes.kt")
     }
+
+    fun testIncorrectInputArgumentEnumType() {
+        myFixture.configureByFiles("java/IncorrectEnumType.java", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=Colors.class) Colors testEnum"))
+        myFixture.checkResultByFile("java/FixedEnumType.java")
+    }
+
+    fun testIncorrectInputArgumentEnumTypeForKotlin() {
+        myFixture.configureByFiles("kotlin/IncorrectEnumType.kt", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=Colors) testEnum: Colors"))
+        myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
+    }
+
+    fun testIncorrectInputArgumentComplexTypeForKotlin() {
+        myFixture.configureByFiles("kotlin/IncorrectComplexType.kt", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testInput: TestInput?"))
+        myFixture.checkResultByFile("kotlin/FixedComplexType.kt")
+    }
 }
