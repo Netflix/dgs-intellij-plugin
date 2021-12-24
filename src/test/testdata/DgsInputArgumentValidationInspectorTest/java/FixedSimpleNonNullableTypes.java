@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument;
 @DgsComponent
 public class IncorrectSimpleNonNullableTypes {
     @DgsQuery
-    public boolean testSimpleListTypes(@InputArgument List<Integer> testInteger) {
+    public boolean testSimpleNonNullableTypes(@InputArgument Integer testInteger) {
         return true;
     }
 }

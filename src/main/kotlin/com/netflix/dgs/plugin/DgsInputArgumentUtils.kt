@@ -125,7 +125,7 @@ object InputArgumentUtils {
     fun isCustomScalarType(inputType: GraphQLType, typeRegistry: TypeDefinitionRegistry) : Boolean {
         if (inputType is GraphQLTypeName) {
             val inputTypeName = (inputType as PsiNamedElement).name!!
-            if (knownTypes.containsKey(inputTypeName)) {
+            if (knownTypes.containsKey(inputTypeName) || inputTypeName == "Int" || inputTypeName == "IntValue") {
                 return false
             }
             return typeRegistry.scalars().contains(inputTypeName) ||  typeRegistry.scalarTypeExtensions().containsKey(inputTypeName)
