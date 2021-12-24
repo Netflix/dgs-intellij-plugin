@@ -57,7 +57,10 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
                             arguments.forEach { graphQLInputValueDefinition ->
                                 val expectedArgName = (graphQLInputValueDefinition.nameIdentifier as GraphQLIdentifierImpl).name
                                 val inputArgument = node.uastParameters.find { it.name == expectedArgName }
-                                if ((inputArgument != null) && ! hasExpectedAnnotation(graphQLInputValueDefinition, inputArgument, typeDefinitionRegistry, isJavaFile)) {
+                                // Enable hinting only if the argument is not a custom scalar or if it does not have the expected type
+                                if ((inputArgument != null) &&
+                                        ! InputArgumentUtils.isCustomScalarType(graphQLInputValueDefinition.type!!, typeDefinitionRegistry) &&
+                                        ! hasExpectedAnnotation(graphQLInputValueDefinition, inputArgument, typeDefinitionRegistry, isJavaFile)) {
                                     val fixedInputArgument = InputArgumentUtils.getHintForInputArgument(graphQLInputValueDefinition, typeDefinitionRegistry, isJavaFile)
                                     val message = MyBundle.getMessage(
                                             "dgs.inspection.dgsinputargumentvalidation.hint",
@@ -85,20 +88,19 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
     private fun hasExpectedAnnotation(graphQLInput: GraphQLInputValueDefinition, inputArgument: UParameter, typeDefinitionRegistry: TypeDefinitionRegistry, isJavaFile: Boolean) : Boolean {
         val inputArgumentAnnotation = inputArgument.getAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION)
         if (inputArgumentAnnotation != null) {
-            // check whether collection type matches, if it exists
+            // Check whether collection type matches, if it exists
             val expectedInputArgumentHint = InputArgumentUtils.getHintForInputArgument(graphQLInput, typeDefinitionRegistry, isJavaFile)
             if (expectedInputArgumentHint.contains("collectionType")) {
-                val expectedCollectionType = InputArgumentUtils.getCollectionType(graphQLInput.type, isJavaFile)
+                val expectedCollectionType = InputArgumentUtils.getCollectionType(graphQLInput.type!!, isJavaFile)
                 val inputCollectionType = inputArgumentAnnotation.findAttributeValue("collectionType")?.text?.removeSuffixIfPresent(".class")
                 if (expectedCollectionType != inputCollectionType) {
                     return false
                 }
             }
 
-            // parse the raw type
+            // Parse the raw type from the input argument and verify match
             val inputArgumentType = inputArgument.text.removePrefix(inputArgumentAnnotation.text).replace(inputArgument.name, "").replace(":", "").trim()
-            val expectedType = InputArgumentUtils.getType(graphQLInput.type, isJavaFile)
-
+            val expectedType = InputArgumentUtils.getType(graphQLInput.type!!, isJavaFile)
             return expectedType == inputArgumentType
         }
 
