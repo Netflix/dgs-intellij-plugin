@@ -19,6 +19,7 @@ package com.netflix.dgs.plugin.services.internal;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.ModificationTracker;
@@ -71,6 +72,10 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
     @Override
     public DgsComponentIndex getDgsComponentIndex() {
+        if(DumbService.isDumb(project)) {
+            return new DgsComponentIndex();
+        }
+
         ModificationTracker javaModificationTracker = PsiModificationTracker.SERVICE.getInstance(project).forLanguage(JavaLanguage.INSTANCE);
         ModificationTracker kotlinModificationTracker = PsiModificationTracker.SERVICE.getInstance(project).forLanguage(KotlinLanguage.INSTANCE);
 
@@ -124,7 +129,6 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
                return true;
             });
-//            stubIndex.processAllKeys(superClassIndexKey, project, item -> {
 
             cachedComponentIndex = dgsComponentIndex;
 
