@@ -82,4 +82,5 @@ data class DgsDataFetcher(
     }
 
     override val name = "${parentType}.${field}"
+    override val type = DgsComponentType.DATA_FETCHER
 }

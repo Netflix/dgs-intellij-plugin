@@ -54,6 +54,7 @@
         <implicitUsageProvider implementation="com.netflix.dgs.plugin.provider.DgsImplicitUsageProvider"/>
 
         <treeStructureProvider implementation="com.netflix.dgs.plugin.provider.DgsProjectStructureProvider"/>
+        <gotoSymbolContributor implementation="com.netflix.dgs.plugin.navigation.DgsSymbolContributor"/>
 
         <projectService serviceInterface="com.netflix.dgs.plugin.services.DgsService" serviceImplementation="com.netflix.dgs.plugin.services.internal.DgsServiceImpl"/>
         <projectService serviceImplementation="com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry"/>

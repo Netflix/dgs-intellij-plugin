@@ -25,5 +25,5 @@ data class DgsCustomContext(
     val psiFile: PsiFile
 ): NamedNavigationComponent {
     override val psiAnnotation = psiClass
-
+    override val type = DgsComponentType.CUSTOM_CONTEXT
 }

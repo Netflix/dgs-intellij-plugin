@@ -21,4 +21,9 @@ import com.intellij.psi.PsiElement
 interface NamedNavigationComponent {
     val name: String
     val psiAnnotation: PsiElement
+    val type: DgsComponentType
+}
+
+enum class DgsComponentType(val description: String) {
+    DATA_FETCHER("data fetcher"), DATA_LOADER("data loader"), ENTITY_FETCHER("entity fetcher"), SCALAR("scalar"), RUNTIME_WIRING("runtime wiring"), CUSTOM_CONTEXT("custom context"), DIRECTIVE("directive")
 }
