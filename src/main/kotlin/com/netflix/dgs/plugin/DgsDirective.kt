@@ -35,4 +35,6 @@ data class DgsDirective(
             return annotation.findAttributeValue("name")?.evaluateString()
         }
     }
+
+    override val type = DgsComponentType.DIRECTIVE
 }

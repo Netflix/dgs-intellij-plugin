@@ -33,4 +33,6 @@ data class DgsDataLoader(
             return annotation.findAttributeValue("name")?.evaluateString()
         }
     }
+
+    override val type = DgsComponentType.DATA_LOADER
 }

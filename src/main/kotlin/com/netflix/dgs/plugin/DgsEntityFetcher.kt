@@ -53,4 +53,6 @@ data class DgsEntityFetcher(
             return getNameFromAnnotation(entityFetcherAnnotation) ?: method.name
         }
     }
+
+    override val type = DgsComponentType.ENTITY_FETCHER
 }

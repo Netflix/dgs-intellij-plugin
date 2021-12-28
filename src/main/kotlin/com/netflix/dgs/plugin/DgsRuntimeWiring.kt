@@ -29,4 +29,6 @@ data class DgsRuntimeWiring(
     companion object {
         fun isDgsRuntimeWiringAnnotation(annotation: UAnnotation) = annotation.qualifiedName == "com.netflix.graphql.dgs.DgsRuntimeWiring"
     }
+
+    override val type = DgsComponentType.RUNTIME_WIRING
 }

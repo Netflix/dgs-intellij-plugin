@@ -30,4 +30,6 @@ data class DgsScalar(
     companion object {
         fun isDgsScalarAnnotation(annotation: UAnnotation) = annotation.qualifiedName == "com.netflix.graphql.dgs.DgsScalar"
     }
+
+    override val type = DgsComponentType.SCALAR
 }
