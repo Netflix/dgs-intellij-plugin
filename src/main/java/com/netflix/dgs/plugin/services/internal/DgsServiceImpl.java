@@ -43,7 +43,6 @@ import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.uast.UAnnotation;
 import org.jetbrains.uast.UastContextKt;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -139,7 +138,8 @@ public class DgsServiceImpl implements DgsService, Disposable {
     public boolean isDgsProject(Project project) {
         if(!dependenciesProcessed.get()) {
             ProjectRootManager.getInstance(project).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
-                if(Objects.requireNonNull(l.getName()).contains("com.netflix.graphql.dgs:graphql-dgs")) {
+                String name = l.getName();
+                if(name != null && name.contains("com.netflix.graphql.dgs:graphql-dgs")) {
                     dependencyFound.set(true);
                     return false;
                 }
