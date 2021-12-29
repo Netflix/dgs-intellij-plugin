@@ -4,9 +4,9 @@
 
 ## [Unreleased]
 
-## [1.0.0]
+## [1.1.0]
 ### Added
-* Navigation from a schema file to data fetchers in Java/Kotlin code
-* Navigation from data fetchers back to the schema definitions
-* A hint/quickfix for when a @DgsComponent@DgsData(parentType=Query)@DgsQueryMutationSubscription@key@DgsEntityFetchercom.netflix.graphql.dgs:graphql-dgs
+* A DGS section in the Project tree that lists all the various DGS components in a project
+* Navigation schema <-> @DgsDirective@DgsScalar
 
+## [1.0.0]
