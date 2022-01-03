@@ -17,9 +17,10 @@
 package com.netflix.dgs.plugin
 
 import com.netflix.dgs.plugin.hints.DgsInputArgumentValidationInspector
+import org.junit.jupiter.api.Test
 
 class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
-
+    @Test
     fun testIncorrectInputArgumentSimpleTypes() {
         myFixture.configureByFiles("java/IncorrectSimpleTypes.java", "InputArguments.graphql")
 
@@ -29,6 +30,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedSimpleTypes.java")
     }
 
+    @Test
     fun testIncorrectInputArgumentSimpleTypesForKotlin() {
         myFixture.configureByFiles("kotlin/IncorrectSimpleTypes.kt", "InputArguments.graphql")
 
@@ -38,6 +40,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedSimpleTypes.kt")
     }
 
+    @Test
     fun testIncorrectInputArgumentSimpleNonNullableTypes() {
         myFixture.configureByFiles("java/IncorrectSimpleNonNullableTypes.java", "InputArguments.graphql")
 
@@ -47,6 +50,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedSimpleNonNullableTypes.java")
     }
 
+    @Test
     fun testIncorrectInputArgumentSimpleNonNullableTypesForKotlin() {
         myFixture.configureByFiles("kotlin/IncorrectSimpleNonNullableTypes.kt", "InputArguments.graphql")
 
@@ -56,6 +60,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedSimpleNonNullableTypes.kt")
     }
 
+    @Test
     fun testIncorrectInputArgumentEnumType() {
         myFixture.configureByFiles("java/IncorrectEnumType.java", "InputArguments.graphql")
 
@@ -65,6 +70,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedEnumType.java")
     }
 
+    @Test
     fun testIncorrectInputArgumentEnumTypeForKotlin() {
         myFixture.configureByFiles("kotlin/IncorrectEnumType.kt", "InputArguments.graphql")
 
@@ -74,6 +80,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
     }
 
+    @Test
     fun testIncorrectInputArgumentComplexTypeForKotlin() {
         myFixture.configureByFiles("kotlin/IncorrectComplexType.kt", "InputArguments.graphql")
 

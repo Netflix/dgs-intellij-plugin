@@ -17,10 +17,11 @@
 package com.netflix.dgs.plugin
 
 import com.netflix.dgs.plugin.hints.DgsComponentInspector
+import org.junit.jupiter.api.Test
 
 class DgsComponentInspectorTest : DgsTestCase() {
 
-
+    @Test
     fun testMissingDgsComponentAnnotation() {
         myFixture.configureByFile("MissingDgsComponent.java")
         myFixture.enableInspections(DgsComponentInspector::class.java)

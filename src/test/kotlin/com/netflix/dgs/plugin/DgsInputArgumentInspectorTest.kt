@@ -17,11 +17,13 @@
 package com.netflix.dgs.plugin
 
 import com.netflix.dgs.plugin.hints.DgsInputArgumentInspector
+import org.junit.jupiter.api.Test
+
 // Temporarily comment tests due to flaky behavior in checkHighlighting warnings
 // Tests complain about missing java.lang.String intermittently
-/*
-class DgsInputArgumentInspectorTest : DgsTestCase() {
 
+class DgsInputArgumentInspectorTest : DgsTestCase() {
+    @Test
     fun testMissingInputArgumentSimpleTypes() {
         myFixture.configureByFiles("java/MissingSimpleTypes.java", "InputArguments.graphql")
 
@@ -31,6 +33,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedSimpleTypes.java")
     }
 
+    @Test
     fun testMissingInputArgumentSimpleTypesForKotlin() {
         myFixture.configureByFiles("kotlin/MissingSimpleTypes.kt", "InputArguments.graphql")
 
@@ -40,6 +43,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedSimpleTypes.kt")
     }
 
+    @Test
     fun testMissingInputArgumentSimpleNonNullableTypes() {
         myFixture.configureByFiles("java/MissingSimpleNonNullableTypes.java", "InputArguments.graphql")
 
@@ -49,6 +53,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedSimpleNonNullableTypes.java")
     }
 
+    @Test
     fun testMissingInputArgumentSimpleNonNullableTypesForKotlin() {
         myFixture.configureByFiles("kotlin/MissingSimpleNonNullableTypes.kt", "InputArguments.graphql")
 
@@ -58,6 +63,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedSimpleNonNullableTypes.kt")
     }
 
+    @Test
     fun testMissingInputArgumentEnumType() {
         myFixture.configureByFiles("java/MissingEnumType.java", "InputArguments.graphql")
 
@@ -67,6 +73,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedEnumType.java")
     }
 
+    @Test
     fun testMissingInputArgumentEnumTypeForKotlin() {
         myFixture.configureByFiles("kotlin/MissingEnumType.kt", "InputArguments.graphql")
 
@@ -76,6 +83,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
     }
 
+    @Test
     fun testMissingInputArgumentComplexType() {
         myFixture.configureByFiles("java/MissingComplexType.java", "InputArguments.graphql")
 
@@ -85,6 +93,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedComplexType.java")
     }
 
+    @Test
     fun testMissingInputArgumentComplexTypeForKotlin() {
         myFixture.configureByFiles("kotlin/MissingComplexType.kt", "InputArguments.graphql")
 
@@ -94,6 +103,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedComplexType.kt")
     }
 
+    @Test
     fun testMissingInputArgumentCollectionType() {
         myFixture.configureByFiles("java/MissingCollectionType.java", "InputArguments.graphql")
 
@@ -103,6 +113,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedCollectionType.java")
     }
 
+    @Test
     fun testMissingInputArgumentCollectionTypeForKotlin() {
         myFixture.configureByFiles("kotlin/MissingCollectionType.kt", "InputArguments.graphql")
 
@@ -112,6 +123,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedCollectionType.kt")
     }
 
+    @Test
     fun testMissingInputArgumentSimpleListTypes() {
         myFixture.configureByFiles("java/MissingSimpleListTypes.java", "InputArguments.graphql")
 
@@ -121,6 +133,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedSimpleListTypes.java")
     }
 
+    @Test
     fun testMissingInputArgumentSimpleListTypesForKotlin() {
         myFixture.configureByFiles("kotlin/MissingSimpleListTypes.kt", "InputArguments.graphql")
 
@@ -130,6 +143,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("kotlin/FixedSimpleListTypes.kt")
     }
 
+    @Test
     fun testMissingInputArgumentScalarType() {
         myFixture.configureByFiles("java/MissingScalarType.java", "InputArguments.graphql")
 
@@ -139,6 +153,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.checkResultByFile("java/FixedScalarType.java")
     }
 
+    @Test
     fun testMissingInputArgumentScalarTypeForKotlin() {
         myFixture.configureByFiles("kotlin/MissingScalarType.kt", "InputArguments.graphql")
 
@@ -149,4 +164,3 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
     }
 
 }
-*/
