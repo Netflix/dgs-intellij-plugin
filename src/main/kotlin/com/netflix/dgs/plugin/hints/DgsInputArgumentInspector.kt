@@ -38,14 +38,15 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
 
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
+
             override fun visitMethod(node: UMethod): Boolean {
 
-                    if (InputArgumentUtils.hasDgsAnnotation(node) ) {
+                if (InputArgumentUtils.hasDgsAnnotation(node) ) {
                         val dgsDataAnnotation = InputArgumentUtils.getDgsAnnotation(node)
                         val dgsService = dgsDataAnnotation.project.getService(DgsService::class.java)
                         val typeDefinitionRegistry = GraphQLSchemaProvider.getInstance(dgsDataAnnotation.project).getRegistryInfo(node.navigationElement).typeDefinitionRegistry
 
-                        val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
+                    val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
                         if (dgsDataFetcher?.schemaPsi != null) {
                             val isJavaFile = dgsDataFetcher?.psiFile is PsiJavaFile
                             val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
@@ -109,6 +110,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                     val param = psiFactory.createParameter(it)
                         (method.sourcePsi as KtFunction).valueParameterList?.addParameter(param)
                 }
+                project.getService(DgsService::class.java).clearCache()
             }
         }
     }

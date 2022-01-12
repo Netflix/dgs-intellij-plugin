@@ -72,6 +72,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
     @Override
     public DgsComponentIndex getDgsComponentIndex() {
+
         if(DumbService.isDumb(project)) {
             return new DgsComponentIndex();
         }
@@ -131,7 +132,6 @@ public class DgsServiceImpl implements DgsService, Disposable {
             });
 
             cachedComponentIndex = dgsComponentIndex;
-
             ProjectView.getInstance(project).refresh();
 
             return dgsComponentIndex;

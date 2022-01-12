@@ -122,6 +122,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                 } else {
                     (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN))
                 }
+                project.getService(DgsService::class.java).clearCache()
             }
 
             descriptor.psiElement.delete()

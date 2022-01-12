@@ -19,7 +19,7 @@ import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.DgsQuery;
 
 @DgsComponent
-public class MissingSimpleListType {
+public class MissingSimpleListTypes {
     @DgsQuery
     public boolean <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument List<String> testStrings">testSimpleListTypes<caret></weak_warning> () {
         return true;

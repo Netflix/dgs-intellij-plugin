@@ -95,7 +95,7 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
                 val fqName = FqName("com.netflix.graphql.dgs.DgsComponent")
                 sourcePsi.addAnnotation(fqName)
             }
-
+            project.getService(DgsService::class.java).clearCache()
         }
     }
 }

@@ -129,6 +129,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
                 val psiFactory = KtPsiFactory(project)
                 val param = psiFactory.createParameter(newInputArgument)
                 descriptor.psiElement.replace(param)
+                project.getService(DgsService::class.java).clearCache()
             }
         }
     }

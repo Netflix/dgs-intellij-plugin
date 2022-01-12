@@ -162,5 +162,4 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
         myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument testScalar: OffsetDateTime?"))
         myFixture.checkResultByFile("kotlin/FixedScalarType.kt")
     }
-
 }
