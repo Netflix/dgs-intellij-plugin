@@ -1,6 +1,7 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # dgs-intellij-plugin Changelog
+## [Unreleased]
 
 ## [1.2.0]
 ### Added
