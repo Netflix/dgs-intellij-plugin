@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument;
 @DgsComponent
 public class IncorrectSimpleListTypes {
     @DgsQuery
-    public boolean testSimpleNonNullableTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument List<Integer> testInteger">@InputArgument List<String> testInteger</weak_warning><caret>) {
+    public boolean testSimpleListTypes(@InputArgument List<Integer> testIntegers, @InputArgument List<Double> testFloats, @InputArgument List<Boolean> testBooleans, @InputArgument List<String> testStrings) {
         return true;
     }
 }

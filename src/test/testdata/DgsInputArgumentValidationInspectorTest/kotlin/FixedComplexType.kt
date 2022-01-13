@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class IncorrectComplexType {
     @DgsQuery
-    fun testComplexType(@InputArgument testInput: TestInput?) : Boolean {
+    fun testComplexType(@InputArgument testInput: TestInput?, @InputArgument testNonNullableInput: TestInput!) : Boolean {
         return true;
     }
 }

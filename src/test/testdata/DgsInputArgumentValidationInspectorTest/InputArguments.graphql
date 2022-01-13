@@ -5,7 +5,8 @@ type Query {
     testEnumType(testEnum: Colors): Boolean
     testComplexType(testInput: TestInput, testNonNullableInput: TestInput!): Boolean
     testCollectionType(testInput: [TestInput], testNonNullableInput: [TestInput!]!): Boolean
-    testSimpleListTypes(testStrings: [String], testNonNullableStrings: [String!]!): Boolean
+    testSimpleListTypes(testIntegers: [Int], testFloats: [Float], testBooleans: [Boolean], testStrings: [String]): Boolean
+    testSimpleNonNullableListType(testIntegers: [Int!]!) : Boolean
     testScalarType(testScalar: DateTime): Boolean
 }
 
