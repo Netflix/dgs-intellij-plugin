@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 class MissingComplexType {
     @DgsQuery
-    fun <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument testInput: TestInput?">testComplexType<caret></weak_warning> () : Boolean {
+    fun <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument testInput: TestInput?">testComplexType</weak_warning><caret> () : Boolean {
         return true;
     }
 }

@@ -89,6 +89,7 @@ class DgsFieldSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
             }
 
             descriptor.psiElement.replace(newAnnotation)
+            project.getService(DgsService::class.java).clearCache()
         }
 
         private fun replaceField(annotationText: String): String {

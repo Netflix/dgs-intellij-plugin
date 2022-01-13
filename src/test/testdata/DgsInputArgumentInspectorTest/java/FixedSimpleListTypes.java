@@ -19,7 +19,7 @@ import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.DgsQuery;
 
 @DgsComponent
-public class MissingSimpleListType {
+public class MissingSimpleListTypes {
     @DgsQuery
     public boolean testSimpleListTypes(@InputArgument List<String> testStrings, @InputArgument List<String> testNonNullableStrings) {
         return true;

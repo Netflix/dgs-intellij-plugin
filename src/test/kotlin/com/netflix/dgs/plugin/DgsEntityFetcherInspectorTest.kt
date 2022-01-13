@@ -17,10 +17,11 @@
 package com.netflix.dgs.plugin
 
 import com.netflix.dgs.plugin.hints.DgsEntityFetcherInspector
+import org.junit.jupiter.api.Test
 
 class DgsEntityFetcherInspectorTest : DgsTestCase() {
 
-
+    @Test
     fun testMissingEntityFetcher() {
         myFixture.configureByFiles("FederatedEntity.graphql", "MissingDgsEntityFetcher.java")
         myFixture.enableInspections(DgsEntityFetcherInspector::class.java)

@@ -21,6 +21,8 @@ import com.intellij.openapi.module.Module
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import java.nio.file.Paths
 
 abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
@@ -28,11 +30,18 @@ abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
         return DGS_PROJECT_DESCRIPTOR
     }
 
+    @BeforeEach
     override fun setUp() {
         super.setUp()
 
         loadLibrary(project, module, "com.netflix.graphql.dgs:graphql-dgs", "graphql-dgs-4.9.2.jar")
     }
+
+    @AfterEach
+    override fun tearDown() {
+        super.tearDown()
+    }
+
 
     companion object {
         val DGS_PROJECT_DESCRIPTOR = DgsProjectDescriptor()

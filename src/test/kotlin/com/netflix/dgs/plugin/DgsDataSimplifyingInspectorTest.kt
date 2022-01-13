@@ -17,10 +17,11 @@
 package com.netflix.dgs.plugin
 
 import com.netflix.dgs.plugin.hints.DgsDataSimplifyingInspector
+import org.junit.jupiter.api.Test
 
 class DgsDataSimplifyingInspectorTest: DgsTestCase() {
 
-
+    @Test
     fun testSimplifyQuery() {
         myFixture.configureByFile("UsingDgsDataForQuery.java")
         myFixture.enableInspections(DgsDataSimplifyingInspector::class.java)

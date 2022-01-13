@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 class MissingScalarType {
     @DgsQuery
-    fun <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument testScalar: OffsetDateTime?">testScalarType<caret></weak_warning> () : Boolean {
+    fun <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument testScalar: OffsetDateTime?">testScalarType</weak_warning><caret> () : Boolean {
         return true;
     }
 }
