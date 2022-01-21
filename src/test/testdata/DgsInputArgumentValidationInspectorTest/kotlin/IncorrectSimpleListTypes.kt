@@ -20,9 +20,9 @@ import com.netflix.graphql.dgs.DgsQuery
 import com.netflix.graphql.dgs.InputArgument
 
 @DgsComponent
-class IncorrectComplexType {
+class IncorrectSimpleListTypes {
     @DgsQuery
-    fun testComplexType(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testInput: TestInput?">@InputArgument testInput: Int?</weak_warning><caret>, @InputArgument testNonNullableInput: TestInput!) : Boolean {
+    fun testSimpleListTypes(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testIntegers: List<Int?>?">@InputArgument testIntegers: List<String?>?</weak_warning><caret>, @InputArgument testFloats: List<Double?>?, @InputArgument testBooleans: List<Boolean?>?, @InputArgument testStrings: List<String?>?) : Boolean {
         return true;
     }
 }

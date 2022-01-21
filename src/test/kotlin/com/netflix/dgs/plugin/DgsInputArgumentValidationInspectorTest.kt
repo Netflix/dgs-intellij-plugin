@@ -41,6 +41,26 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
     }
 
     @Test
+    fun testIncorrectInputArgumentSimpleListTypes() {
+        myFixture.configureByFiles("java/IncorrectSimpleListTypes.java", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument List<Integer> testIntegers"))
+        myFixture.checkResultByFile("java/FixedSimpleListTypes.java")
+    }
+
+    @Test
+    fun testIncorrectInputArgumentSimpleListTypesForKotlin() {
+        myFixture.configureByFiles("kotlin/IncorrectSimpleListTypes.kt", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testIntegers: List<Int?>?"))
+        myFixture.checkResultByFile("kotlin/FixedSimpleListTypes.kt")
+    }
+
+    @Test
     fun testIncorrectInputArgumentSimpleNonNullableTypes() {
         myFixture.configureByFiles("java/IncorrectSimpleNonNullableTypes.java", "InputArguments.graphql")
 
@@ -81,6 +101,16 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
     }
 
     @Test
+    fun testIncorrectInputArgumentComplexType() {
+        myFixture.configureByFiles("java/IncorrectComplexType.java", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument TestInput testInput"))
+        myFixture.checkResultByFile("java/FixedComplexType.java")
+    }
+
+    @Test
     fun testIncorrectInputArgumentComplexTypeForKotlin() {
         myFixture.configureByFiles("kotlin/IncorrectComplexType.kt", "InputArguments.graphql")
 
@@ -88,5 +118,41 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
         myFixture.checkHighlighting(true, false, true, true)
         myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testInput: TestInput?"))
         myFixture.checkResultByFile("kotlin/FixedComplexType.kt")
+    }
+
+    @Test
+    fun testIncorrectInputArgumentCollectionType() {
+        myFixture.configureByFiles("java/IncorrectCollectionType.java", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=TestInput.class) List<TestInput> testInput"))
+        myFixture.checkResultByFile("java/FixedCollectionType.java")
+    }
+
+    @Test
+    fun testIncorrectInputArgumentCollectionTypeForKotlin() {
+        myFixture.configureByFiles("kotlin/IncorrectCollectionType.kt", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=TestInput) testNonNullableInput: List<TestInput>"))
+        myFixture.checkResultByFile("kotlin/FixedCollectionType.kt")
+    }
+
+    @Test
+    fun testIncorrectInputArgumentName() {
+        myFixture.configureByFiles("java/IncorrectInputArgumentName.java", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
+    }
+
+    @Test
+    fun testIncorrectInputArgumentWithIncorrectNameAttribute() {
+        myFixture.configureByFiles("java/IncorrectInputArgumentNameAttribute.java", "InputArguments.graphql")
+
+        myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
+        myFixture.checkHighlighting(true, false, true, true)
     }
 }

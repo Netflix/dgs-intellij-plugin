@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import com.netflix.graphql.dgs.DgsComponent
-import com.netflix.graphql.dgs.DgsData
-import com.netflix.graphql.dgs.DgsQuery
-import com.netflix.graphql.dgs.InputArgument
+import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsData;
+import com.netflix.graphql.dgs.DgsQuery;
+import com.netflix.graphql.dgs.InputArgument;
 
 @DgsComponent
-class IncorrectComplexType {
+public class IncorrectComplexType {
     @DgsQuery
-    fun testComplexType(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testInput: TestInput?">@InputArgument testInput: Int?</weak_warning><caret>, @InputArgument testNonNullableInput: TestInput!) : Boolean {
+    public boolean testComplexType(@InputArgument TestInput testInput, @InputArgument TestInput testNonNullableInput) {
         return true;
     }
 }
