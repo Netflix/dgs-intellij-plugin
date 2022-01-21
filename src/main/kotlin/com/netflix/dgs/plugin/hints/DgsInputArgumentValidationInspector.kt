@@ -117,17 +117,6 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
         return param.name
     }
 
-
-    private fun getInputArgumentNameAttribute(param: UParameter) : String? {
-        val nameValue = param.getAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION)?.findAttribute("name")?.attributeValue
-        if (nameValue != null) {
-            val jvmConstant = nameValue as JvmAnnotationConstantValue
-            if (jvmConstant.constantValue != null) {
-                return jvmConstant.constantValue as String
-            }        }
-        return null
-    }
-
     private fun hasExpectedAnnotation(graphQLInput: GraphQLInputValueDefinition, inputArgument: UParameter, typeDefinitionRegistry: TypeDefinitionRegistry, isJavaFile: Boolean) : Boolean {
         val inputArgumentAnnotation = inputArgument.getAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION)
         if (inputArgumentAnnotation != null) {
