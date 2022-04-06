@@ -124,7 +124,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
             val expectedInputArgumentHint = InputArgumentUtils.getHintForInputArgument(graphQLInput, typeDefinitionRegistry, isJavaFile)
             if (expectedInputArgumentHint.contains("collectionType")) {
                 val expectedCollectionType = InputArgumentUtils.getCollectionType(graphQLInput.type!!, isJavaFile)
-                val inputCollectionType = inputArgumentAnnotation.findAttributeValue("collectionType")?.text?.removeSuffixIfPresent(".class")
+                val inputCollectionType = inputArgumentAnnotation.findAttributeValue("collectionType")?.text?.removeSuffixIfPresent(".class")?.removeSuffixIfPresent("::class")
                 if (expectedCollectionType != inputCollectionType) {
                     return false
                 }

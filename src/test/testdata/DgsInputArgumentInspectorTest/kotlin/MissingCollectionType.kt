@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 class MissingCollectionType {
     @DgsQuery
-    fun <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=TestInput) testInput: List<TestInput?>?">testCollectionType</weak_warning><caret> () : Boolean {
+    fun <weak_warning descr="You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=TestInput::class) testInput: List<TestInput?>?">testCollectionType</weak_warning><caret> () : Boolean {
         return true;
     }
 }

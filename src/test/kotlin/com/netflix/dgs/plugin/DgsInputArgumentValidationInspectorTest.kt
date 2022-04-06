@@ -96,7 +96,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=Colors) testEnum: Colors"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=Colors::class) testEnum: Colors"))
         myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
     }
 
@@ -136,7 +136,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=TestInput) testNonNullableInput: List<TestInput>"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=TestInput::class) testNonNullableInput: List<TestInput>"))
         myFixture.checkResultByFile("kotlin/FixedCollectionType.kt")
     }
 

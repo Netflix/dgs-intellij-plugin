@@ -103,7 +103,7 @@ object InputArgumentUtils {
         if (isListType(input.type!!) || isEnumType(input.type!!, typeRegistry)) {
             val collectionType = getCollectionType(input.type!!, false)
             if (! isSimpleType(collectionType)) {
-                inputArgumentHint.append("(collectionType=$collectionType) ")
+                inputArgumentHint.append("(collectionType=$collectionType::class) ")
             }
         }
         inputArgumentHint.append(argName + ": "+ getType(input.type!!, false)  + " ")
