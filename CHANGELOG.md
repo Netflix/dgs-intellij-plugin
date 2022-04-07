@@ -1,7 +1,13 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # dgs-intellij-plugin Changelog
-## [Unreleased]
+## [1.2.1]
+### Added
+* Update the gradle intelliJ plugin build. 2) DGS plugin to work with 2022.1 EAP builds
+
+### Fixed
+* Fix validation of kotlin collection type for enums and lists of complex types.
+
 
 ## [1.2.0]
 ### Added
