@@ -65,14 +65,18 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                                     "dgs.inspection.dgsinputargument.hint",
                                     inputArgumentsHint
                                 )
-
-                                val pointer = SmartPointerManager.createPointer(node.toUElement() as UMethod)
-                                node.identifyingElement?.let {
-                                    holder.registerProblem(it.navigationElement,
-                                            message,
-                                            ProblemHighlightType.WEAK_WARNING,
-                                            DgsInputArgumentQuickFix(pointer, inputArgumentsList, message)
-                                    )
+                                when(val element = node?.toUElement()){
+                                    is UMethod -> {
+                                        val pointer = SmartPointerManager.createPointer(element)
+                                        node.identifyingElement?.let {
+                                            holder.registerProblem(
+                                                it.navigationElement,
+                                                message,
+                                                ProblemHighlightType.WEAK_WARNING,
+                                                DgsInputArgumentQuickFix(pointer, inputArgumentsList, message)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -83,7 +87,9 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
     }
 
 
-    class DgsInputArgumentQuickFix(private val methodPointer: SmartPsiElementPointer<UMethod>, private val newInputArguments: List<String>, private val fixName: String) : LocalQuickFix {
+    class DgsInputArgumentQuickFix(private val methodPointer: SmartPsiElementPointer<UMethod>,
+                                   private val newInputArguments: List<String>,
+                                   private val fixName: String) : LocalQuickFix {
         override fun getFamilyName(): String {
             return name
         }
