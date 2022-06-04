@@ -1,6 +1,12 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
 # dgs-intellij-plugin Changelog
+
+## [Unreleased]
+
+### Fixed
+* Address NPE on DgsInputArgumentInspector on UMethod.
+
 ## [1.2.1]
 ### Added
 * Update the gradle intelliJ plugin build. 2) DGS plugin to work with 2022.1 EAP builds
@@ -14,7 +20,7 @@
 * Suggest adding `@InputArgument` to methods when the query/mutation has input arguments defined in the schema
 * Hint and quick fix incorrectly typed `@InputArgument`
 * Search DGS components in find symbol (cmd-alt-o)
-* 
+*
 * Only activate plugin for DGS projects
 
 ### Fixed
