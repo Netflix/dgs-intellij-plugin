@@ -3,6 +3,8 @@
 # dgs-intellij-plugin Changelog
 
 ## [Unreleased]
+### Added
+* JSGraphQL to 3.1.4 and Platform Version to IU-221
 
 ### Fixed
 * Address NPE on DgsInputArgumentInspector on UMethod.
