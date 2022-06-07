@@ -2,8 +2,11 @@
 
 # dgs-intellij-plugin Changelog
 
-
 ## [Unreleased]
+### Fixed
+* Address NPE on DgsInputArgumentValidationInspector:143
+
+## [1.2.2]
 ### Fixed
 * Address NPE on DgsInputArgumentInspector on UMethod.
 
