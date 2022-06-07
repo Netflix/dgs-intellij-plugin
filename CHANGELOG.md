@@ -4,10 +4,6 @@
 
 
 ## [Unreleased]
-### Added
-### Fixed
-
-## [1.2.2]
 ### Fixed
 * Address NPE on DgsInputArgumentInspector on UMethod.
 
