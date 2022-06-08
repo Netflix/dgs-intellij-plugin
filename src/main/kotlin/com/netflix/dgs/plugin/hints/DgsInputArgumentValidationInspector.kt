@@ -139,22 +139,35 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
         return false
     }
 
-    private fun registerProblemWithArgumentType(holder: ProblemsHolder, node: UMethod, inputArgument: UParameter, message: String, fixedInputArgument: String) {
-        val pointer = SmartPointerManager.createPointer(node.toUElement() as UMethod)
-        node.identifyingElement?.let {
-            holder.registerProblem(inputArgument.navigationElement,
-                    message,
-                    ProblemHighlightType.WEAK_WARNING,
-                    DgsInputArgumentQuickFix(pointer, fixedInputArgument, fixedInputArgument)
-            )
+    private fun registerProblemWithArgumentType(
+        holder: ProblemsHolder,
+        node: UMethod,
+        inputArgument: UParameter,
+        message: String,
+        fixedInputArgument: String
+    ) {
+        when(val element = node?.toUElement()){
+            is UMethod -> {
+                val pointer = SmartPointerManager.createPointer(element)
+                node.identifyingElement?.let {
+                    holder.registerProblem(
+                        inputArgument.navigationElement,
+                        message,
+                        ProblemHighlightType.WEAK_WARNING,
+                        DgsInputArgumentQuickFix(pointer, fixedInputArgument, fixedInputArgument)
+                    )
+                }
+            }
         }
+
     }
 
     private fun registerProblemWithArgumentName(holder: ProblemsHolder, node: UMethod, inputArgument: UParameter, inputArgumentsList: List<String>, message: String) {
         node.identifyingElement?.let {
-            holder.registerProblem(inputArgument.navigationElement,
-                    message,
-                    ProblemHighlightType.WEAK_WARNING
+            holder.registerProblem(
+                inputArgument.navigationElement,
+                message,
+                ProblemHighlightType.WEAK_WARNING
             )
         }
     }
