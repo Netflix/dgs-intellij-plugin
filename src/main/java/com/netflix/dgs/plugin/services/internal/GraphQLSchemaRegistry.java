@@ -24,6 +24,7 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,11 +38,12 @@ public class GraphQLSchemaRegistry {
 
     public @Nullable
     Optional<PsiElement> psiForSchemaType(@NotNull PsiElement psiElement, @Nullable String parentType, @Nullable String field) {
-
         TypeDefinitionRegistry registry = getRegistry(psiElement);
-        Optional<ObjectTypeDefinition> objectType = getTypeDefinition(registry, parentType);
-        if (objectType.isPresent()) {
-            Optional<FieldDefinition> schemaField = objectType.get().getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
+        List<ObjectTypeDefinition> objectTypes = getTypeDefinitions(registry, parentType);
+        if (!objectTypes.isEmpty()) {
+            var fieldDefinitionList = new ArrayList<FieldDefinition>();
+            objectTypes.stream().map(ObjectTypeDefinition::getFieldDefinitions).forEach(fieldDefinitionList::addAll);
+            Optional<FieldDefinition> schemaField = fieldDefinitionList.stream().filter(e -> e.getName().equals(field)).findAny();
             if (schemaField.isPresent()) {
                 return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
             }
@@ -90,6 +92,18 @@ public class GraphQLSchemaRegistry {
             return  Optional.ofNullable(objectTypeExtensionDefinitions.get(0));
         }
         return Optional.empty();
+    }
+
+    private List<ObjectTypeDefinition> getTypeDefinitions(TypeDefinitionRegistry registry, String schemaType) {
+        List<ObjectTypeDefinition> list = new ArrayList<>();
+        Optional<ObjectTypeDefinition> objectTypeDefinition = registry.getType(schemaType, ObjectTypeDefinition.class);
+        objectTypeDefinition.ifPresent(list::add);
+
+        List<ObjectTypeExtensionDefinition> objectTypeExtensionDefinitions = registry.objectTypeExtensions().get(schemaType);
+        if (objectTypeExtensionDefinitions != null && !objectTypeExtensionDefinitions.isEmpty()) {
+            list.addAll(objectTypeExtensionDefinitions);
+        }
+        return list;
     }
 
     private Optional<InterfaceTypeDefinition> getInterfaceTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
