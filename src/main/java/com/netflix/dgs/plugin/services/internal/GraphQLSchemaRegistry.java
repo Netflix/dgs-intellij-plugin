@@ -41,9 +41,8 @@ public class GraphQLSchemaRegistry {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         List<ObjectTypeDefinition> objectTypes = getTypeDefinitions(registry, parentType);
         if (!objectTypes.isEmpty()) {
-            var fieldDefinitionList = new ArrayList<FieldDefinition>();
-            objectTypes.stream().map(ObjectTypeDefinition::getFieldDefinitions).forEach(fieldDefinitionList::addAll);
-            Optional<FieldDefinition> schemaField = fieldDefinitionList.stream().filter(e -> e.getName().equals(field)).findAny();
+            Optional<FieldDefinition> schemaField = objectTypes.stream().map(ObjectTypeDefinition::getFieldDefinitions).flatMap(o->o.stream())
+                    .filter(e -> e.getName().equals(field)).findAny();
             if (schemaField.isPresent()) {
                 return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
             }
