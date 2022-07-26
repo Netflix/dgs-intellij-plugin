@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 public class MissingCollectionType {
     @DgsQuery
-    public boolean testCollectionType(@InputArgument(collectionType = TestInput.class) List<TestInput> testInput, @InputArgument(collectionType = TestInput.class) List<TestInput> testNonNullableInput) {
+    public boolean testCollectionType(@InputArgument List<TestInput> testInput, @InputArgument List<TestInput> testNonNullableInput) {
         return true;
     }
 }

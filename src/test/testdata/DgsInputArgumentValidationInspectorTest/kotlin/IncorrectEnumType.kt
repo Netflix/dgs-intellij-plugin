@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class IncorrectEnumType {
     @DgsQuery
-    fun testEnumType(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument (collectionType=Colors::class) testEnum: Colors?">@InputArgument testEnum: Colors?</weak_warning><caret>) : Boolean {
+    fun testEnumType(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testEnum: Colors?">@InputArgument testEnum: String</weak_warning><caret>) : Boolean {
         return true;
     }
 }

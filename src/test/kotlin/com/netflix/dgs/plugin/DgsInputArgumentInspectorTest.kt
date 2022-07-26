@@ -69,7 +69,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=Colors.class) Colors testEnum"))
+        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument Colors testEnum"))
         myFixture.checkResultByFile("java/FixedEnumType.java")
     }
 
@@ -79,7 +79,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=Colors::class) testEnum: Colors?"))
+        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument testEnum: Colors?"))
         myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
     }
 
@@ -109,7 +109,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=TestInput.class) List<TestInput> testInput"))
+        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument List<TestInput> testInput"))
         myFixture.checkResultByFile("java/FixedCollectionType.java")
     }
 
@@ -119,7 +119,7 @@ class DgsInputArgumentInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument (collectionType=TestInput::class) testInput: List<TestInput?>?"))
+        myFixture.launchAction(myFixture.findSingleIntention("You can use @InputArgument to extract parameters, e.g. @InputArgument testInput: List<TestInput?>?"))
         myFixture.checkResultByFile("kotlin/FixedCollectionType.kt")
     }
 

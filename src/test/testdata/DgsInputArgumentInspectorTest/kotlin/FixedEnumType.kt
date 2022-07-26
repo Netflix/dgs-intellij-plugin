@@ -21,7 +21,7 @@ import com.netflix.graphql.dgs.DgsQuery;
 @DgsComponent
 class MissingEnumType {
     @DgsQuery
-    fun testEnumType (@InputArgument(collectionType = Colors::class) testEnum: Colors?) : Boolean {
+    fun testEnumType (@InputArgument testEnum: Colors?) : Boolean {
         return true;
     }
 }

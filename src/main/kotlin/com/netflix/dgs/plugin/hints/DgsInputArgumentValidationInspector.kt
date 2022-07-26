@@ -62,7 +62,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
                             // validate each argument specified in the schema against the data fetcher's input arguments
                             node.uastParameters.stream().filter { it.hasAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION) }.toList().forEach { iter ->
                                 val inputArgName = getInputArgumentName(iter)
-                                val schemaSearchResult = arguments?.stream()?.filter { graphQLInputValueDefinition ->
+                                val schemaSearchResult = arguments.stream().filter { graphQLInputValueDefinition ->
                                     inputArgName == (graphQLInputValueDefinition.nameIdentifier as GraphQLIdentifierImpl).name }.toList()
 
                                 // if the list is empty, there is no corresponding input argument with the same name defined in the schema
@@ -120,16 +120,6 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
     private fun hasExpectedAnnotation(graphQLInput: GraphQLInputValueDefinition, inputArgument: UParameter, typeDefinitionRegistry: TypeDefinitionRegistry, isJavaFile: Boolean) : Boolean {
         val inputArgumentAnnotation = inputArgument.getAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION)
         if (inputArgumentAnnotation != null) {
-            // Check whether collection type matches, if it exists
-            val expectedInputArgumentHint = InputArgumentUtils.getHintForInputArgument(graphQLInput, typeDefinitionRegistry, isJavaFile)
-            if (expectedInputArgumentHint.contains("collectionType")) {
-                val expectedCollectionType = InputArgumentUtils.getCollectionType(graphQLInput.type!!, isJavaFile)
-                val inputCollectionType = inputArgumentAnnotation.findAttributeValue("collectionType")?.text?.removeSuffixIfPresent(".class")?.removeSuffixIfPresent("::class")
-                if (expectedCollectionType != inputCollectionType) {
-                    return false
-                }
-            }
-
             // Parse the raw type from the input argument and verify match
             val inputArgumentType = inputArgument.text.removePrefix(inputArgumentAnnotation.text).replace(inputArgument.name, "").replace(":", "").trim()
             val expectedType = InputArgumentUtils.getType(graphQLInput.type!!, isJavaFile)
@@ -159,7 +149,6 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
                 }
             }
         }
-
     }
 
     private fun registerProblemWithArgumentName(holder: ProblemsHolder, node: UMethod, inputArgument: UParameter, inputArgumentsList: List<String>, message: String) {

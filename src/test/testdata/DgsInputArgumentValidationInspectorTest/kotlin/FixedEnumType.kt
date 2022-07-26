@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class IncorrectEnumType {
     @DgsQuery
-    fun testEnumType(@InputArgument(collectionType = Colors::class) testEnum: Colors?) : Boolean {
+    fun testEnumType(@InputArgument testEnum: Colors?) : Boolean {
         return true;
     }
 }

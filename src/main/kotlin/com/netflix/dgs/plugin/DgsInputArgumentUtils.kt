@@ -86,12 +86,6 @@ object InputArgumentUtils {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
         val inputArgumentHint = StringBuilder("@InputArgument ")
 
-        if (isListType(input.type!!) || isEnumType(input.type!!, typeRegistry)) {
-            val collectionType = getCollectionType(input.type!!, true)
-            if (!isSimpleType(collectionType)) {
-                inputArgumentHint.append("(collectionType=$collectionType.class) ")
-            }
-        }
         inputArgumentHint.append(getType(input.type!!, true) + " " + argName)
         return inputArgumentHint.toString()
 
@@ -100,12 +94,7 @@ object InputArgumentUtils {
     private fun getHintForInputArgumentInKotlin(input: GraphQLInputValueDefinition, typeRegistry: TypeDefinitionRegistry) : String {
         val argName = (input.nameIdentifier as GraphQLIdentifierImpl).name
         val inputArgumentHint = StringBuilder("@InputArgument ")
-        if (isListType(input.type!!) || isEnumType(input.type!!, typeRegistry)) {
-            val collectionType = getCollectionType(input.type!!, false)
-            if (! isSimpleType(collectionType)) {
-                inputArgumentHint.append("(collectionType=$collectionType::class) ")
-            }
-        }
+
         inputArgumentHint.append(argName + ": "+ getType(input.type!!, false)  + " ")
         return inputArgumentHint.toString()
     }
@@ -169,21 +158,6 @@ object InputArgumentUtils {
                 } else {
                     type.removeSuffixIfPresent("?")
                 }
-            }
-            else -> ""
-        }
-    }
-
-    fun getCollectionType(inputType: GraphQLType, isJavaFile: Boolean) : String {
-        return when (inputType) {
-            is GraphQLTypeName -> {
-                getRawType((inputType as PsiNamedElement).name!!, isJavaFile)
-            }
-            is GraphQLListType -> {
-                getCollectionType(inputType.type, isJavaFile)
-            }
-            is GraphQLNonNullType -> {
-                getCollectionType(inputType.type, isJavaFile)
             }
             else -> ""
         }
