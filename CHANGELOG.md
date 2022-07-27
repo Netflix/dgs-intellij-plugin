@@ -3,6 +3,8 @@
 # dgs-intellij-plugin Changelog
 
 ## [Unreleased]
+
+## [1.2.4]
 ### Fixed
 * Updated to work with IntelliJ build 222
 * Removed validation on deprecated collection type argument when using @InputArgument for collections and enums.
