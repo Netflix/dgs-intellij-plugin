@@ -86,7 +86,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=Colors.class) Colors testEnum"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument Colors testEnum"))
         myFixture.checkResultByFile("java/FixedEnumType.java")
     }
 
@@ -96,7 +96,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=Colors::class) testEnum: Colors"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testEnum: Colors?"))
         myFixture.checkResultByFile("kotlin/FixedEnumType.kt")
     }
 
@@ -126,7 +126,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=TestInput.class) List<TestInput> testInput"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument List<TestInput> testInput"))
         myFixture.checkResultByFile("java/FixedCollectionType.java")
     }
 
@@ -136,7 +136,7 @@ class DgsInputArgumentValidationInspectorTest : DgsTestCase() {
 
         myFixture.enableInspections(DgsInputArgumentValidationInspector::class.java)
         myFixture.checkHighlighting(true, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument (collectionType=TestInput::class) testNonNullableInput: List<TestInput>"))
+        myFixture.launchAction(myFixture.findSingleIntention("Fix annotation to @InputArgument testNonNullableInput: List<TestInput>"))
         myFixture.checkResultByFile("kotlin/FixedCollectionType.kt")
     }
 

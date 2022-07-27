@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument
 @DgsComponent
 class IncorrectCollectionType {
     @DgsQuery
-    fun testCollectionType(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument (collectionType=TestInput::class) testNonNullableInput: List<TestInput>">@InputArgument testNonNullableInput: List<TestInput></weak_warning><caret>) : Boolean {
+    fun testCollectionType(<weak_warning descr="@InputArgument type does not match the schema, expected @InputArgument testNonNullableInput: List<TestInput>">@InputArgument testNonNullableInput: TestInput</weak_warning><caret>) : Boolean {
         return true;
     }
 }

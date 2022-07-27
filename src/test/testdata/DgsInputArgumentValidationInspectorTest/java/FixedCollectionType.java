@@ -22,7 +22,7 @@ import com.netflix.graphql.dgs.InputArgument;
 @DgsComponent
 public class IncorrectCollectionType {
     @DgsQuery
-    public boolean testCollectionType(@InputArgument(collectionType = TestInput.class) List<TestInput> testInput) {
+    public boolean testCollectionType(@InputArgument List<TestInput> testInput) {
         return true;
     }
 }
