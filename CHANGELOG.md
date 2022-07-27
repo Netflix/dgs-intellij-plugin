@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 ### Fixed
+* Updated to work with IntelliJ build 222
+* Removed validation on deprecated collection type argument when using @InputArgument for collections and enums.
+
+## [1.2.3]
+### Fixed
 * Address NPE on DgsInputArgumentValidationInspector:143
 
 ## [1.2.2]
