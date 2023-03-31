@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.2.6]
+### Fixed
+* Updated to work with IntelliJ build 231
+
 
 ## [1.2.5]
 ### Fixed
