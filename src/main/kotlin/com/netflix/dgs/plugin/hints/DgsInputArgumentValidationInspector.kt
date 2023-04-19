@@ -17,29 +17,25 @@
 package com.netflix.dgs.plugin.hints
 
 import com.intellij.codeInspection.*
-import com.intellij.lang.jsgraphql.psi.*
+import com.intellij.lang.jsgraphql.psi.GraphQLInputValueDefinition
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLFieldDefinitionImpl
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
-import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
+import com.intellij.lang.jsgraphql.schema.GraphQLRegistryProvider
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
 import com.intellij.uast.UastVisitorAdapter
-import com.intellij.util.containers.isEmpty
 import com.netflix.dgs.plugin.InputArgumentUtils
 import com.netflix.dgs.plugin.MyBundle
 import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
-import org.jetbrains.kotlin.resolve.calls.smartcasts.IdentifierInfo
-import org.jetbrains.kotlin.util.removeSuffixIfPresent
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UParameter
 import org.jetbrains.uast.toUElement
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
-import kotlin.streams.toList
 
 @Suppress("UElementAsPsi")
 class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool() {
@@ -51,7 +47,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
                 if (InputArgumentUtils.hasDgsAnnotation(node) ) {
                     val dgsDataAnnotation = InputArgumentUtils.getDgsAnnotation(node)
                     val dgsService = dgsDataAnnotation.project.getService(DgsService::class.java)
-                    val typeDefinitionRegistry = GraphQLSchemaProvider.getInstance(dgsDataAnnotation.project).getRegistryInfo(node.navigationElement).typeDefinitionRegistry
+                    val typeDefinitionRegistry = GraphQLRegistryProvider.getInstance(dgsDataAnnotation.project).getRegistryInfo(node.navigationElement).typeDefinitionRegistry
 
                     val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
                     if (dgsDataFetcher?.schemaPsi != null) {
@@ -136,7 +132,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
         message: String,
         fixedInputArgument: String
     ) {
-        when(val element = node?.toUElement()){
+        when(val element = node.toUElement()){
             is UMethod -> {
                 val pointer = SmartPointerManager.createPointer(element)
                 node.identifyingElement?.let {

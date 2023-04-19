@@ -36,18 +36,18 @@ import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 class DgsFieldSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
-            override fun visitMethod(method: UMethod): Boolean {
-                val dgsService = method.project.getService(DgsService::class.java)
-                if(!dgsService.isDgsProject(method.project)) {
+            override fun visitMethod(node: UMethod): Boolean {
+                val dgsService = node.project.getService(DgsService::class.java)
+                if(!dgsService.isDgsProject(node.project)) {
                     return false
                 }
 
-                val psiAnnotation = method.annotations.find { DgsDataFetcher.isDataFetcherAnnotation(it) }
+                val psiAnnotation = node.annotations.find { DgsDataFetcher.isDataFetcherAnnotation(it) }
                 if (psiAnnotation != null) {
                     val fieldAttribute = psiAnnotation.findAttribute("field")
                     if (fieldAttribute != null) {
                         val fieldValue = (fieldAttribute.attributeValue as JvmAnnotationConstantValue?)?.constantValue
-                        if (fieldValue == method.name) {
+                        if (fieldValue == node.name) {
                             val message = MyBundle.getMessage(
                                 "dgs.inspection.fieldvalue.simplify"
                             )
@@ -83,7 +83,7 @@ class DgsFieldSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
                 }
                 is KtAnnotationEntry -> {
                     val newAnnotationText = replaceField(descriptor.psiElement.text)
-                    KtPsiFactory(project).createAnnotationEntry(newAnnotationText) as PsiElement
+                    KtPsiFactory(project).createAnnotationEntry(newAnnotationText)
                 }
                 else -> return
             }

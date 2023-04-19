@@ -16,7 +16,7 @@
 
 package com.netflix.dgs.plugin.services.internal;
 
-import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
+import com.intellij.lang.jsgraphql.schema.GraphQLRegistryProvider;
 import com.intellij.lang.jsgraphql.types.language.*;
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry;
 import com.intellij.openapi.project.Project;
@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class GraphQLSchemaRegistry {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         List<ObjectTypeDefinition> objectTypes = getTypeDefinitions(registry, parentType);
         if (!objectTypes.isEmpty()) {
-            Optional<FieldDefinition> schemaField = objectTypes.stream().map(ObjectTypeDefinition::getFieldDefinitions).flatMap(o->o.stream())
+            Optional<FieldDefinition> schemaField = objectTypes.stream().map(ObjectTypeDefinition::getFieldDefinitions).flatMap(Collection::stream)
                     .filter(e -> e.getName().equals(field)).findAny();
             if (schemaField.isPresent()) {
                 return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
@@ -83,7 +84,7 @@ public class GraphQLSchemaRegistry {
     private Optional<ObjectTypeDefinition> getTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
         Optional<ObjectTypeDefinition> objectTypeDefinition = registry.getType(schemaType, ObjectTypeDefinition.class);
         if (objectTypeDefinition.isPresent()) {
-            return Optional.ofNullable(objectTypeDefinition.get());
+            return objectTypeDefinition;
         }
 
         List<ObjectTypeExtensionDefinition> objectTypeExtensionDefinitions = registry.objectTypeExtensions().get(schemaType);
@@ -108,7 +109,7 @@ public class GraphQLSchemaRegistry {
     private Optional<InterfaceTypeDefinition> getInterfaceTypeDefinition(TypeDefinitionRegistry registry, String schemaType) {
         Optional<InterfaceTypeDefinition> interfaceTypeDefinition = registry.getType(schemaType, InterfaceTypeDefinition.class);
         if (interfaceTypeDefinition.isPresent()) {
-            return Optional.ofNullable(interfaceTypeDefinition.get());
+            return interfaceTypeDefinition;
         }
 
         List<InterfaceTypeExtensionDefinition> interfaceTypeExtensionDefinitions = registry.interfaceTypeExtensions().get(schemaType);
@@ -119,7 +120,7 @@ public class GraphQLSchemaRegistry {
     }
 
     private TypeDefinitionRegistry getRegistry(@NotNull PsiElement psiElement) {
-        return GraphQLSchemaProvider.getInstance(project)
+        return GraphQLRegistryProvider.getInstance(project)
                 .getRegistryInfo(psiElement).getTypeDefinitionRegistry();
     }
 }

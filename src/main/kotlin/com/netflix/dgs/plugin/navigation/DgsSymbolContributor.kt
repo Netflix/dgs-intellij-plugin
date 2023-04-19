@@ -54,7 +54,7 @@ class DgsComponentNavigationItem(private val name: String, private val project: 
         return name
     }
 
-    override fun getPresentation(): ItemPresentation? {
+    override fun getPresentation(): ItemPresentation {
         return DgsComponentPresentation(name, location, type)
     }
 
