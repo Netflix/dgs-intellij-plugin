@@ -77,8 +77,8 @@ public class DgsServiceImpl implements DgsService, Disposable {
             return new DgsComponentIndex();
         }
 
-        ModificationTracker javaModificationTracker = PsiModificationTracker.SERVICE.getInstance(project).forLanguage(JavaLanguage.INSTANCE);
-        ModificationTracker kotlinModificationTracker = PsiModificationTracker.SERVICE.getInstance(project).forLanguage(KotlinLanguage.INSTANCE);
+        ModificationTracker javaModificationTracker = PsiModificationTracker.getInstance(project).forLanguage(JavaLanguage.INSTANCE);
+        ModificationTracker kotlinModificationTracker = PsiModificationTracker.getInstance(project).forLanguage(KotlinLanguage.INSTANCE);
 
         if (cachedComponentIndex != null && javaModificationCount == javaModificationTracker.getModificationCount() && kotlinModificationCount == kotlinModificationTracker.getModificationCount()) {
             return cachedComponentIndex;

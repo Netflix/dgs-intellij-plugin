@@ -21,7 +21,6 @@ import com.intellij.codeInspection.util.IntentionFamilyName
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.uast.UastVisitorAdapter
-import com.intellij.util.castSafelyTo
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.MyBundle
 import com.netflix.dgs.plugin.services.DgsService
@@ -90,7 +89,8 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
                 }
 
                 val importStatement = factory.createImportStatement(factory.createTypeByFQClassName("com.netflix.graphql.dgs.DgsComponent").resolve()!!)
-                sourcePsi.containingFile.castSafelyTo<PsiJavaFile>()?.importList?.add(importStatement)
+                val psiJavaFile = sourcePsi.containingFile as PsiJavaFile
+                psiJavaFile.importList?.add(importStatement)
             } else if(sourcePsi is KtClass) {
                 val fqName = FqName("com.netflix.graphql.dgs.DgsComponent")
                 sourcePsi.addAnnotation(fqName)

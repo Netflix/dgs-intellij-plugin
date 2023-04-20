@@ -18,7 +18,7 @@ package com.netflix.dgs.plugin.hints
 
 import com.intellij.codeInspection.*
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLFieldDefinitionImpl
-import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
+import com.intellij.lang.jsgraphql.schema.GraphQLRegistryProvider
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.util.parentOfType
@@ -44,12 +44,12 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                 if (InputArgumentUtils.hasDgsAnnotation(node) ) {
                         val dgsDataAnnotation = InputArgumentUtils.getDgsAnnotation(node)
                         val dgsService = dgsDataAnnotation.project.getService(DgsService::class.java)
-                        val typeDefinitionRegistry = GraphQLSchemaProvider.getInstance(dgsDataAnnotation.project).getRegistryInfo(node.navigationElement).typeDefinitionRegistry
+                        val typeDefinitionRegistry = GraphQLRegistryProvider.getInstance(dgsDataAnnotation.project).getRegistryInfo(node.navigationElement).typeDefinitionRegistry
 
                     val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
                         if (dgsDataFetcher?.schemaPsi != null) {
-                            val isJavaFile = dgsDataFetcher?.psiFile is PsiJavaFile
-                            val arguments = (dgsDataFetcher?.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
+                            val isJavaFile = dgsDataFetcher.psiFile is PsiJavaFile
+                            val arguments = (dgsDataFetcher.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
                             if (arguments != null && arguments.size > 0 && !node.uastParameters.any { it.hasAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION) }) {
                                 val inputArgumentsHint: String = InputArgumentUtils.getHintForInputArgument(arguments[0], typeDefinitionRegistry,  isJavaFile)
                                 val inputArgumentsList = mutableListOf<String>()
@@ -65,7 +65,7 @@ class DgsInputArgumentInspector : AbstractBaseUastLocalInspectionTool() {
                                     "dgs.inspection.dgsinputargument.hint",
                                     inputArgumentsHint
                                 )
-                                when(val element = node?.toUElement()){
+                                when(val element = node.toUElement()){
                                     is UMethod -> {
                                         val pointer = SmartPointerManager.createPointer(element)
                                         node.identifyingElement?.let {
