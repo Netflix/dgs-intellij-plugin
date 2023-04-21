@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-## [1.2.7]
+## [1.2.8]
 ### Fixed
 * Updated to work with graphql-js 4.0, and updated to jdk 17
 
