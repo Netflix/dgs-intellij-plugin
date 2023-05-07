@@ -46,7 +46,7 @@ class DgsEntityFetcherInspector : LocalInspectionTool() {
                 if (element is GraphQLObjectTypeExtensionDefinition){
                     directives = element.directives
                 }
-                if (directives.any { (it.nameIdentifier as GraphQLIdentifierImpl).name == "key" }) {
+                if (directives.any { (it.nameIdentifier as GraphQLIdentifierImpl?)?.name == "key" }) {
                     // look up the corresponding entity fetcher in the type registry
                     val entityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }
                     if (entityFetcher == null) {
