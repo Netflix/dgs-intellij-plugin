@@ -19,8 +19,13 @@ package com.netflix.dgs.plugin.services.internal;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.psi.PsiAnnotation;
@@ -141,13 +146,17 @@ public class DgsServiceImpl implements DgsService, Disposable {
     @Override
     public boolean isDgsProject(Project project) {
         if(!dependenciesProcessed.get()) {
-            ProjectRootManager.getInstance(project).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
-                String name = l.getName();
-                if(name != null && name.contains("com.netflix.graphql.dgs:graphql-dgs")) {
-                    dependencyFound.set(true);
-                    return false;
+            ReadAction.run(() -> {
+                for (Module m : ModuleManager.getInstance(project).getModules()) {
+                    ModuleRootManager.getInstance(m).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
+                        String name = l.getName();
+                        if(name != null && name.contains("com.netflix.graphql.dgs:graphql-dgs")) {
+                            dependencyFound.set(true);
+                            return false;
+                        }
+                        return true;
+                    });
                 }
-                return true;
             });
 
             dependenciesProcessed.getAndSet(true);
