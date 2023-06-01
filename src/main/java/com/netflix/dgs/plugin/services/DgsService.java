@@ -18,6 +18,7 @@ package com.netflix.dgs.plugin.services;
 
 
 import com.intellij.openapi.project.Project;
+import org.jetbrains.kotlin.modules.Module;
 
 public interface DgsService {
     DgsComponentIndex getDgsComponentIndex();
