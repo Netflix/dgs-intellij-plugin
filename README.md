@@ -15,6 +15,7 @@ The plugin integrates with the [JS GraphQL](https://plugins.jetbrains.com/plugin
 The DGS IntelliJ plugin works with the underlying [JS GraphQL IntelliJ Plugin](https://jimkyndemeyer.github.io/js-graphql-intellij-plugin/) to support additional functionality provided by the DGS Framework. The JS GraphQL plugin accepts a `.graphqlconfig` file for specifying different parameters such as schema location and project setup.
 
 > **Note**
+> 
 > When using a `.graphqlconfig` file, it's important that schema locations are specified using `includes` so that your application's schema is found correctly. If you use `schemaPath`, you will run into errors because you are overriding all of the possible schema locations. If you find errors about missing type definitions or federation directives, it's likely as a result of this issue.
 
 
