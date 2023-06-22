@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.3.0]
+### Fixed
+* fix(DgsService): isDgsProject check dependencies on all modules by @coleturner in https://github.com/Netflix/dgs-intellij-plugin/pull/67
+
 ## [1.2.8]
 ### Fixed
 * Updated to work with graphql-js 4.0, and updated to jdk 17
