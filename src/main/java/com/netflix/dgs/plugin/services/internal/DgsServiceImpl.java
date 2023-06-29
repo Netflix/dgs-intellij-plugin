@@ -22,6 +22,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
@@ -49,6 +50,8 @@ import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.uast.UAnnotation;
 import org.jetbrains.uast.UastContextKt;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -118,7 +121,12 @@ public class DgsServiceImpl implements DgsService, Disposable {
             });
 
             StubIndexKey<String, KtAnnotationEntry> key = KotlinAnnotationsIndex.getInstance().getKey();
-            stubIndex.processAllKeys(key, project, annotation -> {
+            List<String> list = new ArrayList<>();
+            stubIndex.processAllKeys(key, project, e -> {
+                ProgressManager.checkCanceled();
+                return list.add(e);
+            });
+            for(String annotation : list) {
                 if (annotations.contains(annotation)) {
                     StubIndex.getElements(key, annotation, project, GlobalSearchScope.projectScope(project), KtAnnotationEntry.class).forEach(dataFetcherAnnotation -> {
                         UAnnotation uElement = (UAnnotation) UastContextKt.toUElement(dataFetcherAnnotation);
@@ -127,8 +135,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
                         }
                     });
                 }
-                return true;
-            });
+            }
 
             StubIndexKey<String, KtClassOrObject> superClassIndexKey = KotlinSuperClassIndex.getInstance().getKey();
             stubIndex.processElements(superClassIndexKey, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), KtClassOrObject.class, clazz -> {
