@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+## [1.3.1]
+### Fixed
+* Fix plugin crash/freeze due to recursive calls to StubIndex.
+
+
 ## [1.3.0]
 ### Fixed
 * fix(DgsService): isDgsProject check dependencies on all modules by @coleturner in https://github.com/Netflix/dgs-intellij-plugin/pull/67
