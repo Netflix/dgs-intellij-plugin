@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.3.2]
+### Fixed
+* Updated to work with IntelliJ build 232
+
 ## [1.3.1]
 ### Fixed
 * Fix plugin crash/freeze due to recursive calls to StubIndex.
