@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.3.4]
+### Fixed
+* Updated to work with IntelliJ build 233
+
 ## [1.3.3]
 ### Fixed
 * Added DgsInputArgumentValidationInspector description by @esfomeado in https://github.com/Netflix/dgs-intellij-plugin/pull/79
