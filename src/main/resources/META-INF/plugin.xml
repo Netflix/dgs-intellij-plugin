@@ -18,7 +18,7 @@
 <idea-plugin>
     <id>com.netflix.graphql.dgs.intellijplugin</id>
     <name>DGS</name>
-    <vendor>Netflix</vendor>
+    <vendor>netflix</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
