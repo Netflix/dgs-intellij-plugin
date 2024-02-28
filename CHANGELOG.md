@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.3.7]
+### Fixed
+* Updated to work with IntelliJ build 241
+
 ## [1.3.5]
 ### Fixed
 * Updated to work with IntelliJ platform version 2023.3
