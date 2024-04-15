@@ -1,0 +1,6 @@
+scalar _FieldSet
+directive @key(fields: _FieldSet!, resolvable: Boolean) repeatable on OBJECT | INTERFACE
+type Movie @key(fields:"movieId", resolvable: false) {
+movieId: String
+budget: Int
+}

@@ -46,7 +46,16 @@ class DgsEntityFetcherInspector : LocalInspectionTool() {
                 if (element is GraphQLObjectTypeExtensionDefinition){
                     directives = element.directives
                 }
-                if (directives.any { (it.nameIdentifier as GraphQLIdentifierImpl?)?.name == "key" }) {
+                val keyDirective = directives.find { (it.nameIdentifier as GraphQLIdentifierImpl?)?.name == "key" }
+                if (keyDirective != null) {
+                    val isNotResolvable = keyDirective.arguments?.argumentList?.any { it.name == "resolvable" && it.value?.text.equals("false") } ?: false
+                    val hasExtendsDirective = directives.any { it.name == "extends" }
+
+                    // if the key directive has a resolvable argument or the extends keyword, we don't need to check for the entity fetcher
+                    if(isNotResolvable || hasExtendsDirective) {
+                        return
+                    }
+
                     // look up the corresponding entity fetcher in the type registry
                     val entityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }
                     if (entityFetcher == null) {
