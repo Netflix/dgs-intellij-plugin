@@ -1,7 +1,0 @@
-scalar _FieldSet
-directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
-directive @extends on OBJECT | INTERFACE
-type Movie @key(fields:"movieId") @extends {
-movieId: String
-budget: Int
-}
