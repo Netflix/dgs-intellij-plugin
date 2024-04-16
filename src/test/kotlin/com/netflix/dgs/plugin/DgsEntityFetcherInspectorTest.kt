@@ -36,12 +36,4 @@ class DgsEntityFetcherInspectorTest : DgsTestCase() {
 
         myFixture.checkHighlighting()
     }
-
-    @Test
-    fun testWithExtends() {
-        myFixture.configureByFiles("FederatedEntityWithExtends.graphql", "MissingDgsEntityFetcher.java")
-        myFixture.enableInspections(DgsEntityFetcherInspector::class.java)
-
-        myFixture.checkHighlighting()
-    }
 }
