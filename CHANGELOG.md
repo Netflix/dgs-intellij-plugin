@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.3.8]
+### Fixed
+* fix: @DgsEntity hint for resolvable false by @JocyW in https://github.com/Netflix/dgs-intellij-plugin/pull/86
+
 ## [1.3.7]
 ### Fixed
 * Updated to work with IntelliJ build 241
