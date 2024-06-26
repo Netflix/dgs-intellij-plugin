@@ -120,7 +120,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 return true;
             });
 
-            StubIndexKey<String, KtAnnotationEntry> key = KotlinAnnotationsIndex.getInstance().getKey();
+            StubIndexKey<String, KtAnnotationEntry> key = KotlinAnnotationsIndex.Helper.getIndexKey();
             List<String> list = new ArrayList<>();
             stubIndex.processAllKeys(key, project, e -> {
                 ProgressManager.checkCanceled();
@@ -137,7 +137,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 }
             }
 
-            StubIndexKey<String, KtClassOrObject> superClassIndexKey = KotlinSuperClassIndex.getInstance().getKey();
+            StubIndexKey<String, KtClassOrObject> superClassIndexKey = KotlinSuperClassIndex.Helper.getIndexKey();
             stubIndex.processElements(superClassIndexKey, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), KtClassOrObject.class, clazz -> {
                 dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
                return true;
