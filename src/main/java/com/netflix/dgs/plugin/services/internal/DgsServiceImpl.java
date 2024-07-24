@@ -16,6 +16,7 @@
 
 package com.netflix.dgs.plugin.services.internal;
 
+import E.H.S;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.Disposable;
@@ -28,6 +29,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
@@ -152,22 +154,23 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
     @Override
     public boolean isDgsProject(Project project) {
-        if(!dependenciesProcessed.get()) {
-            ReadAction.run(() -> {
-                for (Module m : ModuleManager.getInstance(project).getModules()) {
-                    ModuleRootManager.getInstance(m).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
-                        String name = l.getName();
-                        if(name != null && name.contains("com.netflix.graphql.dgs:graphql-dgs")) {
-                            dependencyFound.set(true);
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-            });
-
-            dependenciesProcessed.getAndSet(true);
+        if (dependencyFound.get() == true) {
+            return true;
         }
+
+        ReadAction.run(() -> {
+            for (Module m : ModuleManager.getInstance(project).getModules()) {
+                ModuleRootManager.getInstance(m).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
+                    String name = l.getName();
+                    if (name != null && name.contains("com.netflix.graphql.dgs:graphql-dgs")) {
+                        dependencyFound.set(true);
+                        return false;
+                    }
+                    return true;
+                });
+
+            }
+        });
 
         return dependencyFound.get();
     }
