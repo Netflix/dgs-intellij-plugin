@@ -19,15 +19,13 @@ package com.netflix.dgs.plugin.services.internal;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.externalSystem.service.project.manage.ProjectDataImportListener;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
-import com.intellij.openapi.roots.ProjectFileIndex;
-import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
@@ -42,6 +40,7 @@ import com.netflix.dgs.plugin.DgsCustomContext;
 import com.netflix.dgs.plugin.services.DgsComponentIndex;
 import com.netflix.dgs.plugin.services.DgsComponentProcessor;
 import com.netflix.dgs.plugin.services.DgsService;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.idea.KotlinLanguage;
 import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex;
 import org.jetbrains.kotlin.idea.stubindex.KotlinSuperClassIndex;
@@ -71,6 +70,16 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
     public DgsServiceImpl(Project project) {
         this.project = project;
+
+        project.getMessageBus().connect().subscribe(ProjectDataImportListener.TOPIC,
+                new ProjectDataImportListener() {
+                    @Override
+                    public void onImportFinished(@Nullable String projectPath) {
+                        dependencyFound.set(false);
+                        dependenciesProcessed.set(false);
+
+                    }
+                });
     }
 
     private volatile long javaModificationCount;
@@ -81,7 +90,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
     @Override
     public DgsComponentIndex getDgsComponentIndex() {
 
-        if(DumbService.isDumb(project)) {
+        if (DumbService.isDumb(project)) {
             return new DgsComponentIndex();
         }
 
@@ -103,7 +112,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             annotations.forEach(dataFetcherAnnotation -> {
                 stubIndex.processElements(JavaStubIndexKeys.ANNOTATIONS, dataFetcherAnnotation, project, GlobalSearchScope.projectScope(project), PsiAnnotation.class, annotation -> {
                     UAnnotation uElement = (UAnnotation) UastContextKt.toUElement(annotation);
-                    if(uElement != null) {
+                    if (uElement != null) {
                         processor.process(uElement);
                     }
                     return true;
@@ -113,7 +122,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             stubIndex.processElements(JavaStubIndexKeys.SUPER_CLASSES, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), PsiReferenceList.class, refList -> {
                 PsiClass clazz = PsiTreeUtil.getParentOfType(refList, PsiClass.class);
 
-                if(clazz != null) {
+                if (clazz != null) {
                     dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
                 }
 
@@ -126,11 +135,11 @@ public class DgsServiceImpl implements DgsService, Disposable {
                 ProgressManager.checkCanceled();
                 return list.add(e);
             });
-            for(String annotation : list) {
+            for (String annotation : list) {
                 if (annotations.contains(annotation)) {
                     StubIndex.getElements(key, annotation, project, GlobalSearchScope.projectScope(project), KtAnnotationEntry.class).forEach(dataFetcherAnnotation -> {
                         UAnnotation uElement = (UAnnotation) UastContextKt.toUElement(dataFetcherAnnotation);
-                        if(uElement != null) {
+                        if (uElement != null) {
                             processor.process(uElement);
                         }
                     });
@@ -140,7 +149,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             StubIndexKey<String, KtClassOrObject> superClassIndexKey = KotlinSuperClassIndex.Helper.getIndexKey();
             stubIndex.processElements(superClassIndexKey, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), KtClassOrObject.class, clazz -> {
                 dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
-               return true;
+                return true;
             });
 
             cachedComponentIndex = dgsComponentIndex;
@@ -152,21 +161,25 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
     @Override
     public boolean isDgsProject(Project project) {
-        if(!dependenciesProcessed.get()) {
-            ReadAction.run(() -> {
-                for (Module m : ModuleManager.getInstance(project).getModules()) {
-                    ModuleRootManager.getInstance(m).orderEntries().librariesOnly().compileOnly().forEachLibrary(l -> {
-                        String name = l.getName();
-                        if(name != null && name.contains("com.netflix.graphql.dgs:graphql-dgs")) {
-                            dependencyFound.set(true);
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-            });
+        if (!dependenciesProcessed.get()) {
+            for (Module m : ModuleManager.getInstance(project).getModules()) {
+                var libraries = ModuleRootManager.getInstance(m).orderEntries().librariesOnly().compileOnly();
+                libraries.forEachLibrary(l -> {
+                    dependenciesProcessed.getAndSet(true);
+                    String name = l.getName();
+                    if (name != null && name.contains("com.netflix.graphql.dgs")) {
+                        dependencyFound.set(true);
+                        return false;
+                    }
+                    return true;
+                });
 
-            dependenciesProcessed.getAndSet(true);
+                if(dependencyFound.get()) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         return dependencyFound.get();
