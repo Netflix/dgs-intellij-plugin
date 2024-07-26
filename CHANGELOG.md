@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+
+## [1.3.10]
+### Fixed
+* Fix loading of DGS related components and inspections for new DGS projects. 
+
 ## [1.3.8]
 ### Fixed
 * fix: @DgsEntity hint for resolvable false by @JocyW in https://github.com/Netflix/dgs-intellij-plugin/pull/86
