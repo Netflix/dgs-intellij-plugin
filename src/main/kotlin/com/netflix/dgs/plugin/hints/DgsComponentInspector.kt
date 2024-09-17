@@ -25,7 +25,7 @@ import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.MyBundle
 import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.idea.util.addAnnotation
-import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.getUastParentOfType
@@ -92,7 +92,7 @@ class DgsComponentInspector : AbstractBaseUastLocalInspectionTool() {
                 val psiJavaFile = sourcePsi.containingFile as PsiJavaFile
                 psiJavaFile.importList?.add(importStatement)
             } else if(sourcePsi is KtClass) {
-                val fqName = FqName("com.netflix.graphql.dgs.DgsComponent")
+                val fqName = ClassId.fromString("com/netflix/graphql/dgs/DgsComponent")
                 sourcePsi.addAnnotation(fqName)
             }
             project.getService(DgsService::class.java).clearCache()

@@ -25,6 +25,7 @@ import com.intellij.uast.UastVisitorAdapter
 import com.netflix.dgs.plugin.MyBundle
 import com.netflix.dgs.plugin.services.DgsService
 import org.jetbrains.kotlin.idea.util.addAnnotation
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
@@ -95,6 +96,7 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
             val method = descriptor.psiElement.toUElement()?.getParentOfType<UMethod>()
 
             val annotationFQN = "com.netflix.graphql.dgs.${newAnnotation.substringAfter("@")}"
+            val annotationFQNKotlin = ClassId.fromString(annotationFQN.replace(".", "/"))
 
             if (file is PsiJavaFile) {
                 val importStatement =
@@ -116,11 +118,11 @@ class DgsDataSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
             } else if (file is KtFile) {
                 if (fieldValue != null && fieldValue != method?.name) {
                     (method?.sourcePsi as KtFunction).addAnnotation(
-                        FqName(annotationFQN),
+                        annotationFQNKotlin,
                         "field = \"${fieldValue}\""
                     )
                 } else {
-                    (method?.sourcePsi as KtFunction).addAnnotation(FqName(annotationFQN))
+                    (method?.sourcePsi as KtFunction).addAnnotation(annotationFQNKotlin)
                 }
                 project.getService(DgsService::class.java).clearCache()
             }
