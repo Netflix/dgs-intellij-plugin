@@ -16,6 +16,7 @@
 
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -51,10 +52,12 @@ dependencies {
         plugins(properties("platformPlugins").split(","))
         bundledPlugins(properties("platformBundledPlugins").split(","))
         instrumentationTools()
+        testFramework(TestFrameworkType.Bundled)
     }
     testImplementation(platform("org.junit:junit-bom:5.9.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.platform:junit-platform-launcher")
+    testImplementation("junit:junit:4.+")
 }
 
 

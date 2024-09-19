@@ -18,33 +18,16 @@ package com.netflix.dgs.plugin
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
-import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.PsiTestUtil
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
-import org.junit.jupiter.api.AfterEach
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase5
 import org.junit.jupiter.api.BeforeEach
 import java.nio.file.Paths
 
-abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase() {
-    override fun getProjectDescriptor(): LightProjectDescriptor {
-        return DGS_PROJECT_DESCRIPTOR
-    }
+abstract class DgsTestCase : LightJavaCodeInsightFixtureTestCase5() {
 
     @BeforeEach
-    override fun setUp() {
-        super.setUp()
-
-        loadLibrary(project, module, "com.netflix.graphql.dgs:graphql-dgs", "graphql-dgs-4.9.2.jar")
-    }
-
-    @AfterEach
-    override fun tearDown() {
-        super.tearDown()
-    }
-
-
-    companion object {
-        val DGS_PROJECT_DESCRIPTOR = DgsProjectDescriptor()
+    fun setUp() {
+        loadLibrary(fixture.project, fixture.module, "com.netflix.graphql.dgs:graphql-dgs", "graphql-dgs-4.9.2.jar")
     }
 
     private fun loadLibrary(

@@ -19,21 +19,22 @@ package com.netflix.dgs.plugin
 import com.netflix.dgs.plugin.hints.DgsEntityFetcherInspector
 import org.junit.jupiter.api.Test
 
+
 class DgsEntityFetcherInspectorTest : DgsTestCase() {
 
     @Test
     fun testMissingEntityFetcher() {
-        myFixture.configureByFiles("FederatedEntity.graphql", "MissingDgsEntityFetcher.java")
-        myFixture.enableInspections(DgsEntityFetcherInspector::class.java)
+        fixture.configureByFiles("FederatedEntity.graphql", "MissingDgsEntityFetcher.java")
+        fixture.enableInspections(DgsEntityFetcherInspector::class.java)
 
-        myFixture.checkHighlighting(true, false, true, true)
+        fixture.checkHighlighting(true, false, true, true)
     }
 
     @Test
     fun testWithResolvableFalse() {
-        myFixture.configureByFiles("FederatedEntityWithResolvableFalse.graphql", "MissingDgsEntityFetcher.java")
-        myFixture.enableInspections(DgsEntityFetcherInspector::class.java)
+        fixture.configureByFiles("FederatedEntityWithResolvableFalse.graphql", "MissingDgsEntityFetcher.java")
+        fixture.enableInspections(DgsEntityFetcherInspector::class.java)
 
-        myFixture.checkHighlighting()
+        fixture.checkHighlighting()
     }
 }

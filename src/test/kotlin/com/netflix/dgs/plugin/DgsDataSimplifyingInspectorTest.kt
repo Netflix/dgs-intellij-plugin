@@ -23,11 +23,11 @@ class DgsDataSimplifyingInspectorTest: DgsTestCase() {
 
     @Test
     fun testSimplifyQuery() {
-        myFixture.configureByFile("UsingDgsDataForQuery.java")
-        myFixture.enableInspections(DgsDataSimplifyingInspector::class.java)
-        myFixture.checkHighlighting(false, false, true, true)
-        myFixture.launchAction(myFixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
-        myFixture.checkResultByFile("FixedDgsDataForQuery.java")
+        fixture.configureByFile("UsingDgsDataForQuery.java")
+        fixture.enableInspections(DgsDataSimplifyingInspector::class.java)
+        fixture.checkHighlighting(false, false, true, true)
+        fixture.launchAction(fixture.findSingleIntention("@DgsData(parentType=\"Query\") can be simplified to @DgsQuery"))
+        fixture.checkResultByFile("FixedDgsDataForQuery.java")
     }
 }
 
