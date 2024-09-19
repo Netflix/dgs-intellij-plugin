@@ -57,7 +57,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.platform:junit-platform-launcher")
-    testImplementation("junit:junit:4.+")
+    testRuntimeOnly("junit:junit:4.13.2")
 }
 
 
