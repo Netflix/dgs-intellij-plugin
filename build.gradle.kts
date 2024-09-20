@@ -53,6 +53,7 @@ dependencies {
         bundledPlugins(properties("platformBundledPlugins").split(","))
         instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
+        pluginVerifier()
     }
     testImplementation(platform("org.junit:junit-bom:5.9.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -86,6 +87,10 @@ intellijPlatform {
         }
     }
     pluginVerification {
+        freeArgs = listOf(
+            "-mute",
+            "TemplateWordInPluginName"
+        )
         ides {
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
