@@ -26,7 +26,9 @@
     <depends>com.intellij.lang.jsgraphql</depends>
 
     <resource-bundle>messages.DGSMessages</resource-bundle>
-
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true" />
+    </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <localInspection language="UAST" implementationClass="com.netflix.dgs.plugin.hints.DgsComponentInspector"
                          enabledByDefault="true" groupName="DGS inspections" groupPathKey="dgs"

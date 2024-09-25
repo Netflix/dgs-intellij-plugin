@@ -23,11 +23,11 @@ class DgsComponentInspectorTest : DgsTestCase() {
 
     @Test
     fun testMissingDgsComponentAnnotation() {
-        myFixture.configureByFile("MissingDgsComponent.java")
-        myFixture.enableInspections(DgsComponentInspector::class.java)
+        fixture.configureByFile("MissingDgsComponent.java")
+        fixture.enableInspections(DgsComponentInspector::class.java)
 
-        myFixture.checkHighlighting(true, false, false, true)
-        myFixture.launchAction(myFixture.findSingleIntention("A class should be annotated @DgsComponent when DGS annotations are used within the class"))
-        myFixture.checkResultByFile("FixedMissingDgsComponent.java")
+        fixture.checkHighlighting(true, false, false, true)
+        fixture.launchAction(fixture.findSingleIntention("A class should be annotated @DgsComponent when DGS annotations are used within the class"))
+        fixture.checkResultByFile("FixedMissingDgsComponent.java")
     }
 }

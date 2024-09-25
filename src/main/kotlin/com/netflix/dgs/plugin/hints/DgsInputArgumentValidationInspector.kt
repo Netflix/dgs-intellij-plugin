@@ -117,7 +117,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
         val inputArgumentAnnotation = inputArgument.getAnnotation(InputArgumentUtils.DGS_INPUT_ARGUMENT_ANNOTATION)
         if (inputArgumentAnnotation != null) {
             // Parse the raw type from the input argument and verify match
-            val inputArgumentType = inputArgument.type.presentableText
+            val inputArgumentType = inputArgument.type.presentableText + if (inputArgument.hasAnnotation("org.jetbrains.annotations.Nullable")) "?" else ""
             val expectedType = InputArgumentUtils.getType(graphQLInput.type!!, isJavaFile)
             return expectedType == inputArgumentType
         }
