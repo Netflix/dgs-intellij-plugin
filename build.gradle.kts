@@ -87,10 +87,6 @@ intellijPlatform {
         }
     }
     pluginVerification {
-        freeArgs = listOf(
-            "-mute",
-            "TemplateWordInPluginName"
-        )
         ides {
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
