@@ -68,7 +68,6 @@ intellijPlatform {
         version = properties("pluginVersion")
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
-            untilBuild = properties("pluginUntilBuild")
         }
         description = projectDir.resolve("README.md").readText().lines().run {
             val start = "<!-- Plugin description -->"
