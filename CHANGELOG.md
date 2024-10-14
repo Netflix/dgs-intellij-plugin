@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.4.2]
+### Fixed
+* Remove upper boundary for supported IDE versions
+* Update Gradle plugin and dependencies version
+
+## [1.4.1]
+### Fixed
+* Support K2 Kotlin mode
 
 ## [1.3.10]
 ### Fixed
