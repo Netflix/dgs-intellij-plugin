@@ -2,6 +2,7 @@
 .idea/*.xml
 .idea/*.iml
 .idea/.gitignore
+.intellijPlatform
 .qodana
 build
 /.idea/shelf
