@@ -16,7 +16,8 @@
 
 package com.netflix.dgs.plugin.services.internal;
 
-import com.intellij.lang.jsgraphql.schema.GraphQLRegistryProvider;
+import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
+import com.intellij.lang.jsgraphql.schema.GraphQLTypeDefinitionUtil;
 import com.intellij.lang.jsgraphql.types.language.*;
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry;
 import com.intellij.openapi.project.Project;
@@ -45,19 +46,19 @@ public class GraphQLSchemaRegistry {
             Optional<FieldDefinition> schemaField = objectTypes.stream().map(ObjectTypeDefinition::getFieldDefinitions).flatMap(Collection::stream)
                     .filter(e -> e.getName().equals(field)).findAny();
             if (schemaField.isPresent()) {
-                return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
+                return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(schemaField.get().getSourceLocation(), psiElement.getProject())).map(PsiElement::getParent);
             }
         } else if ("_entities".equals(parentType)) {
             Optional<ObjectTypeDefinition> entitiesType = getTypeDefinition(registry, field);
             if (entitiesType.isPresent()) {
-                return Optional.ofNullable(entitiesType.get().getElement());
+                return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(entitiesType.get().getSourceLocation(), psiElement.getProject()));
             }
         } else {
             Optional<InterfaceTypeDefinition> interfaceType = getInterfaceTypeDefinition(registry, parentType);
             if (interfaceType.isPresent()) {
                 Optional<FieldDefinition> schemaField = interfaceType.get().getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
                 if (schemaField.isPresent()) {
-                    return Optional.ofNullable(schemaField.get().getSourceLocation().getElement());
+                    return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(schemaField.get().getSourceLocation(), psiElement.getProject()));
                 }
             }
         }
@@ -68,14 +69,14 @@ public class GraphQLSchemaRegistry {
     public Optional<PsiElement> psiForDirective(@NotNull PsiElement psiElement, @NotNull String name) {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         Optional<DirectiveDefinition> directiveDefinition = registry.getDirectiveDefinition(name);
-        return directiveDefinition.map(AbstractNode::getElement);
+        return directiveDefinition.map(definition -> GraphQLTypeDefinitionUtil.findElement(definition.getSourceLocation(), psiElement.getProject()));
     }
 
     public Optional<PsiElement> psiForScalar(@NotNull PsiElement psiElement, @NotNull String name) {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         ScalarTypeDefinition scalarTypeDefinition = registry.scalars().get(name);
         if (scalarTypeDefinition != null) {
-            return Optional.ofNullable(scalarTypeDefinition.getElement());
+            return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(scalarTypeDefinition.getSourceLocation(), psiElement.getProject()));
         } else {
             return Optional.empty();
         }
@@ -120,7 +121,7 @@ public class GraphQLSchemaRegistry {
     }
 
     private TypeDefinitionRegistry getRegistry(@NotNull PsiElement psiElement) {
-        return GraphQLRegistryProvider.getInstance(project)
-                .getRegistryInfo(psiElement).getTypeDefinitionRegistry();
+        return GraphQLSchemaProvider.getInstance(project)
+                .getSchemaInfo(psiElement).getRegistry();
     }
 }
