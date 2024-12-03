@@ -53,7 +53,7 @@ class DgsInputArgumentValidationInspector : AbstractBaseUastLocalInspectionTool(
                     val dgsDataFetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.psiAnnotation.toUElement() == dgsDataAnnotation.toUElement() }
                     if (dgsDataFetcher?.schemaPsi != null) {
                         val isJavaFile = dgsDataFetcher.psiFile is PsiJavaFile
-                        val arguments = (dgsDataFetcher.schemaPsi as GraphQLFieldDefinitionImpl).argumentsDefinition?.inputValueDefinitionList
+                        val arguments = (dgsDataFetcher.schemaPsi as? GraphQLFieldDefinitionImpl)?.argumentsDefinition?.inputValueDefinitionList
                         if (arguments != null && arguments.size > 0) {
 
                             // validate each argument specified in the schema against the data fetcher's input arguments
