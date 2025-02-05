@@ -16,7 +16,9 @@
 
 package com.netflix.dgs.plugin.services
 
+import com.intellij.psi.PsiClass
 import com.netflix.dgs.plugin.*
+import org.jetbrains.kotlin.psi.KtClassOrObject
 import java.util.concurrent.CopyOnWriteArraySet
 
 class DgsComponentIndex {
@@ -37,4 +39,13 @@ class DgsComponentIndex {
             .plus(directives.asSequence())
             .plus(dataLoaders.asSequence()).toSet()
     }
+
+    fun addDgsCustomContext(psiClass: Any?) {
+        if (psiClass == null || psiClass !is PsiClass || psiClass !is KtClassOrObject || psiClass.name == null) {
+            return
+        }
+
+        customContexts.add(DgsCustomContext(psiClass.name!!, psiClass, psiClass.containingFile))
+    }
+
 }
