@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -81,9 +82,10 @@ intellijPlatform {
         }.joinToString("\n").run { markdownToHTML(this) }
 
         changeNotes = provider {
-            changelog.run {
-                getOrNull(properties("pluginVersion")) ?: getLatest()
-            }.toHTML()
+            changelog.renderItem(
+                changelog.run {
+                    getOrNull(properties("pluginVersion")) ?: getLatest()
+            }, Changelog.OutputType.HTML)
         }
     }
     pluginVerification {
