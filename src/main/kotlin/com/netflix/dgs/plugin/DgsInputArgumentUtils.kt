@@ -19,7 +19,6 @@ package com.netflix.dgs.plugin
 import com.intellij.lang.jsgraphql.psi.*
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.lang.jsgraphql.types.language.EnumTypeDefinition
-import com.intellij.lang.jsgraphql.types.language.ScalarTypeDefinition
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiNamedElement

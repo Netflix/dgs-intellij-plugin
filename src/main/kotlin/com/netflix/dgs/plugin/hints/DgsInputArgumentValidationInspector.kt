@@ -20,7 +20,6 @@ import com.intellij.codeInspection.*
 import com.intellij.lang.jsgraphql.psi.GraphQLInputValueDefinition
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLFieldDefinitionImpl
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
-import com.intellij.lang.jsgraphql.schema.GraphQLRegistryProvider
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry
 import com.intellij.lang.jvm.annotation.JvmAnnotationConstantValue

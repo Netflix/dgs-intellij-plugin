@@ -20,7 +20,6 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiIdentifier
 import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.DgsDataFetcher

@@ -18,7 +18,6 @@ package com.netflix.dgs.plugin.hints
 
 import com.intellij.codeInspection.*
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLFieldDefinitionImpl
-import com.intellij.lang.jsgraphql.schema.GraphQLRegistryProvider
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
