@@ -94,8 +94,8 @@ class DgsFieldSimplifyingInspector : AbstractBaseUastLocalInspectionTool() {
 
         private fun replaceField(annotationText: String): String {
             return annotationText
-                .replace(Regex("""field[\s]*=[\s]*".*""""), "")
-                .replace(Regex(""",[\s]*"""), "")
+                .replace(Regex("""field\s*=\s*".*""""), "")
+                .replace(Regex(""",\s*"""), "")
                 .replace("()", "")
         }
     }

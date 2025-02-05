@@ -36,7 +36,6 @@ import com.intellij.psi.stubs.StubIndex;
 import com.intellij.psi.stubs.StubIndexKey;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.netflix.dgs.plugin.DgsCustomContext;
 import com.netflix.dgs.plugin.services.DgsComponentIndex;
 import com.netflix.dgs.plugin.services.DgsComponentProcessor;
 import com.netflix.dgs.plugin.services.DgsService;
@@ -121,11 +120,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
             stubIndex.processElements(JavaStubIndexKeys.SUPER_CLASSES, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), PsiReferenceList.class, refList -> {
                 PsiClass clazz = PsiTreeUtil.getParentOfType(refList, PsiClass.class);
-
-                if (clazz != null) {
-                    dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
-                }
-
+                dgsComponentIndex.addDgsCustomContext(clazz);
                 return true;
             });
 
@@ -148,7 +143,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
 
             StubIndexKey<String, KtClassOrObject> superClassIndexKey = KotlinSuperClassIndex.Helper.getIndexKey();
             stubIndex.processElements(superClassIndexKey, "DgsCustomContextBuilder", project, GlobalSearchScope.projectScope(project), KtClassOrObject.class, clazz -> {
-                dgsComponentIndex.getCustomContexts().add(new DgsCustomContext(clazz.getName(), clazz, clazz.getContainingFile()));
+                dgsComponentIndex.addDgsCustomContext(clazz);
                 return true;
             });
 
