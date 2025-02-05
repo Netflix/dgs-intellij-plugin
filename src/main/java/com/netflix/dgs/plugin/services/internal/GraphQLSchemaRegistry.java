@@ -18,7 +18,13 @@ package com.netflix.dgs.plugin.services.internal;
 
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
 import com.intellij.lang.jsgraphql.schema.GraphQLTypeDefinitionUtil;
-import com.intellij.lang.jsgraphql.types.language.*;
+import com.intellij.lang.jsgraphql.types.language.DirectiveDefinition;
+import com.intellij.lang.jsgraphql.types.language.FieldDefinition;
+import com.intellij.lang.jsgraphql.types.language.InterfaceTypeDefinition;
+import com.intellij.lang.jsgraphql.types.language.InterfaceTypeExtensionDefinition;
+import com.intellij.lang.jsgraphql.types.language.ObjectTypeDefinition;
+import com.intellij.lang.jsgraphql.types.language.ObjectTypeExtensionDefinition;
+import com.intellij.lang.jsgraphql.types.language.ScalarTypeDefinition;
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
