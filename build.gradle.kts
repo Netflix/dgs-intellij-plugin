@@ -27,7 +27,7 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "2.0.21"
+    id("org.jetbrains.kotlin.jvm") version "2.1.10"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij.platform") version "2.1.0"
     // Gradle Changelog Plugin
@@ -55,7 +55,7 @@ dependencies {
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
     }
-    testImplementation(platform("org.junit:junit-bom:5.11.2"))
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("junit:junit:4.13.2")
