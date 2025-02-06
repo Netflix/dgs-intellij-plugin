@@ -30,7 +30,7 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "2.1.10"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.2.1"
+    id("org.jetbrains.intellij.platform") version "2.2.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
 
@@ -52,7 +52,6 @@ dependencies {
         create(properties("platformType"), properties("platformVersion"))
         plugins(properties("platformPlugins").split(","))
         bundledPlugins(properties("platformBundledPlugins").split(","))
-        instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
     }
