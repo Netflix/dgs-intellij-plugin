@@ -43,6 +43,17 @@ jobs:
     needs: gradleValidation
     runs-on: ubuntu-latest
     steps:
+      - name: Check disk usage
+        run: df -h
+
+      - name: Remove unused Docker images
+        run: docker system prune -af
+
+      - name: Clean up temporary files
+        run: sudo rm -rf /tmp/*
+
+      - name: Check disk usage after cleanup
+        run: df -h
 
       # Check out current repository
       - name: Fetch Sources
