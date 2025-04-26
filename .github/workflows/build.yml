@@ -46,11 +46,41 @@ jobs:
       - name: Check disk usage
         run: df -h
 
-      - name: Remove unused Docker images
-        run: docker system prune -af
-
-      - name: Clean up temporary files
-        run: sudo rm -rf /tmp/*
+      - name: Clean up space
+        run: |
+          # Remove large unnecessary packages
+          sudo apt-get remove -y '^ghc-.*'
+          sudo apt-get remove -y '^dotnet-.*'
+          sudo apt-get remove -y '^llvm-.*'
+          sudo apt-get remove -y 'php.*'
+          sudo apt-get remove -y azure-cli google-cloud-sdk google-chrome-stable firefox powershell
+          sudo apt-get remove -y microsoft-edge-stable
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+          
+          # Remove large directories
+          sudo rm -rf /usr/share/dotnet/
+          sudo rm -rf /usr/local/lib/android/
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /opt/hostedtoolcache/go
+          sudo rm -rf /opt/hostedtoolcache/node
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
+          
+          # Clean npm cache
+          npm cache clean --force
+          
+          # Clean yarn cache
+          yarn cache clean
+          
+          # Clean apt cache
+          sudo apt-get clean
+          
+          # Remove Docker images
+          docker image prune -af
 
       - name: Check disk usage after cleanup
         run: df -h
