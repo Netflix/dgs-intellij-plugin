@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -31,7 +32,7 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "2.1.20"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.5.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
 
@@ -53,7 +54,6 @@ dependencies {
         create(properties("platformType"), properties("platformVersion"))
         plugins(properties("platformPlugins").split(","))
         bundledPlugins(properties("platformBundledPlugins").split(","))
-        instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
     }
@@ -61,6 +61,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.14.0")
 }
 
 
@@ -141,7 +142,7 @@ tasks {
     test {
         // show standard out and standard error of the test JVM(s) on the console
         testLogging {
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            exceptionFormat = TestExceptionFormat.FULL
             showStandardStreams = true
             events("passed", "skipped", "failed")
         }
