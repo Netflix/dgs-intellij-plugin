@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
@@ -28,7 +29,7 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "2.1.10"
+    id("org.jetbrains.kotlin.jvm") version "2.1.20"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij.platform") version "2.1.0"
     // Gradle Changelog Plugin
@@ -127,7 +128,9 @@ tasks {
             targetCompatibility = it
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = it
+            compilerOptions {
+                jvmTarget.set(JvmTarget.fromTarget(it))
+            }
         }
     }
 
