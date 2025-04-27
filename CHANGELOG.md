@@ -3,6 +3,11 @@
 # dgs-intellij-plugin Changelog
 
 ## [Unreleased]
+
+## [1.4.4]
+### Fixed
+* Update IntelliJ platform and other dependencies.
+
 ## [1.4.3]
 ### Fixed
 * Fix loading of navigation markers for IntelliJ 2024.3
