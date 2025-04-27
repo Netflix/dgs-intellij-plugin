@@ -56,7 +56,7 @@ dependencies {
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
     }
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation(platform("org.junit:junit-bom:5.12.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("junit:junit:4.13.2")
