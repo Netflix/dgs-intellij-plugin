@@ -61,7 +61,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.14.0")
 }
 
 
