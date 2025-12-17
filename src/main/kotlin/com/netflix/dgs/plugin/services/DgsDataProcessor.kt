@@ -31,6 +31,7 @@ class DgsComponentProcessor(
     private val graphQLSchemaRegistry: GraphQLSchemaRegistry,
     private val dgsComponentIndex: DgsComponentIndex
 ) : Processor<UAnnotation> {
+
     override fun process(uAnnotation: UAnnotation): Boolean {
 
         val uMethod = uAnnotation.getParentOfType<UMethod>()
@@ -141,6 +142,20 @@ class DgsComponentProcessor(
                     )
 
                     dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+
+                    // If parentType is an interface, also create entries for all implementing types
+                    val implementingTypes = graphQLSchemaRegistry.getTypesImplementingInterface(uMethod, parentType)
+                    implementingTypes.forEach { implementingType ->
+                        val implDgsDataFetcher = DgsDataFetcher(
+                            implementingType,
+                            field,
+                            uMethod.sourcePsi!!,
+                            it,
+                            uAnnotation.sourcePsi?.containingFile!!,
+                            graphQLSchemaRegistry.psiForSchemaType(uMethod, implementingType, field)?.orNull()
+                        )
+                        dgsComponentIndex.dataFetchers.add(implDgsDataFetcher)
+                    }
                 }
 
             }
@@ -160,6 +175,20 @@ class DgsComponentProcessor(
                 )
 
                 dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+
+                // If parentType is an interface, also create entries for all implementing types
+                val implementingTypes = graphQLSchemaRegistry.getTypesImplementingInterface(uMethod, parentType)
+                implementingTypes.forEach { implementingType ->
+                    val implDgsDataFetcher = DgsDataFetcher(
+                        implementingType,
+                        field,
+                        uMethod.sourcePsi!!,
+                        uAnnotation.sourcePsi!!,
+                        uAnnotation.sourcePsi?.containingFile!!,
+                        graphQLSchemaRegistry.psiForSchemaType(uMethod, implementingType, field)?.orNull()
+                    )
+                    dgsComponentIndex.dataFetchers.add(implDgsDataFetcher)
+                }
             }
         }
     }

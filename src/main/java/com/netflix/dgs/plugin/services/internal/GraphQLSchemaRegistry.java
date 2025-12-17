@@ -25,6 +25,7 @@ import com.intellij.lang.jsgraphql.types.language.InterfaceTypeExtensionDefiniti
 import com.intellij.lang.jsgraphql.types.language.ObjectTypeDefinition;
 import com.intellij.lang.jsgraphql.types.language.ObjectTypeExtensionDefinition;
 import com.intellij.lang.jsgraphql.types.language.ScalarTypeDefinition;
+import com.intellij.lang.jsgraphql.types.language.TypeName;
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeDefinitionRegistry;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -64,7 +65,7 @@ public class GraphQLSchemaRegistry {
             if (interfaceType.isPresent()) {
                 Optional<FieldDefinition> schemaField = interfaceType.get().getFieldDefinitions().stream().filter(f -> f.getName().equals(field)).findAny();
                 if (schemaField.isPresent()) {
-                    return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(schemaField.get().getSourceLocation(), psiElement.getProject()));
+                    return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(schemaField.get().getSourceLocation(), psiElement.getProject())).map(PsiElement::getParent);
                 }
             }
         }
@@ -124,6 +125,47 @@ public class GraphQLSchemaRegistry {
             return  Optional.ofNullable(interfaceTypeExtensionDefinitions.get(0));
         }
         return Optional.empty();
+    }
+
+    public List<String> getTypesImplementingInterface(@NotNull PsiElement psiElement, @NotNull String interfaceName) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
+
+        // Check if the parentType is actually an interface
+        Optional<InterfaceTypeDefinition> interfaceType = getInterfaceTypeDefinition(registry, interfaceName);
+        if (!interfaceType.isPresent()) {
+            return new ArrayList<>(); // Not an interface
+        }
+
+        List<String> implementingTypes = new ArrayList<>();
+
+        // Search all object types to find those implementing this interface
+        registry.types().values().forEach(typeDefinition -> {
+            if (typeDefinition instanceof ObjectTypeDefinition) {
+                ObjectTypeDefinition objectType = (ObjectTypeDefinition) typeDefinition;
+                // Check if this type implements the interface
+                objectType.getImplements().stream()
+                    .filter(type -> type instanceof TypeName && ((TypeName) type).getName().equals(interfaceName))
+                    .findAny()
+                    .ifPresent(t -> implementingTypes.add(objectType.getName()));
+            }
+        });
+
+        // Also check type extensions
+        registry.objectTypeExtensions().values().forEach(extensions -> {
+            extensions.forEach(extension -> {
+                extension.getImplements().stream()
+                    .filter(type -> type instanceof TypeName && ((TypeName) type).getName().equals(interfaceName))
+                    .findAny()
+                    .ifPresent(t -> {
+                        // Only add if not already in the list (avoid duplicates)
+                        if (!implementingTypes.contains(extension.getName())) {
+                            implementingTypes.add(extension.getName());
+                        }
+                    });
+            });
+        });
+
+        return implementingTypes;
     }
 
     private TypeDefinitionRegistry getRegistry(@NotNull PsiElement psiElement) {
