@@ -91,11 +91,7 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
-                channels = listOf(ProductRelease.Channel.RELEASE)
-                sinceBuild = properties("pluginSinceBuild")
-            }
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, properties("pluginVerifierIdeVersions"))
         }
     }
     signing {
