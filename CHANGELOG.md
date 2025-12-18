@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.4.6]
+### Fixed
+* Code Linkage works for Implicit and Explicit @DgsData.List){})
+
 ## [1.4.5]
 ### Fixed
 * Expand DGS field resolver links for all interface derived type.

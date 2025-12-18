@@ -1,0 +1,32 @@
+interface Video {
+    title: String
+    contentAdvisory: Advisory
+}
+
+type Movie implements Video {
+    title: String
+    contentAdvisory: Advisory
+    director: String
+}
+
+type Show implements Video {
+    title: String
+    contentAdvisory: Advisory
+    episodes: Int
+}
+
+type Season implements Video {
+    title: String
+    contentAdvisory: Advisory
+    seasonNumber: Int
+}
+
+type Episode implements Video {
+    title: String
+    contentAdvisory: Advisory
+    episodeNumber: Int
+}
+
+type Advisory {
+    rating: String
+}

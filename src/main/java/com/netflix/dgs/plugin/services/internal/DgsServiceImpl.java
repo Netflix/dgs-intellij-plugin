@@ -60,6 +60,7 @@ public class DgsServiceImpl implements DgsService, Disposable {
             "DgsMutation",
             "DgsSubscription",
             "DgsData",
+            "DgsData.List",
             "DgsEntityFetcher",
             "DgsDataLoader",
             "DgsDirective",
