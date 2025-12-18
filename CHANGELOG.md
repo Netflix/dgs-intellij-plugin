@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+## [1.4.5]
+### Fixed
+* Expand DGS field resolver links for all interface derived type.
+
 ## [1.4.4]
 ### Fixed
 * Update IntelliJ platform and other dependencies.
