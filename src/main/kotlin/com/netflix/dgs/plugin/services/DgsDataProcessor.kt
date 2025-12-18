@@ -131,23 +131,23 @@ class DgsComponentProcessor(
     private fun processDataFetcher(uMethod: UMethod, uAnnotation: UAnnotation) {
         val methodPsi = uMethod.sourcePsi!!
 
-        // Only process from @DgsData.List if the current annotation IS the list itself (explicit @DgsData.List)
-        // If the current annotation is @DgsData and a list exists, it's implicit @Repeatable - process the individual annotation
+        // Distinguish between explicit @DgsData.List and implicit @Repeatable:
+        // - Explicit: User wrote @DgsData.List({...}) - we process from the container
+        // - Implicit: User wrote multiple @DgsData annotations - Java creates container, but we process individuals
         if (uAnnotation.qualifiedName == "com.netflix.graphql.dgs.DgsData.List") {
-            // Explicit @DgsData.List - process all annotations from the container
+            // Explicit @DgsData.List - extract and process all annotations from the container
             val listAnnotation = uAnnotation.sourcePsi as? PsiAnnotation
             if (listAnnotation != null) {
-                // Check if we've already processed this method's @DgsData.List to avoid duplicates
+                // Avoid duplicate processing when stub index returns both @DgsData.List and individual annotations
                 if (processedDataFetcherMethods.contains(methodPsi)) {
                     return
                 }
                 processedDataFetcherMethods.add(methodPsi)
 
-                // Access the value attribute which contains the array of @DgsData annotations
-                val valueAttribute = listAnnotation.findAttributeValue("value")
-                val annotations = when (valueAttribute) {
+                // Extract @DgsData annotations from the value attribute array
+                val annotations = when (val valueAttribute = listAnnotation.findAttributeValue("value")) {
                     is PsiArrayInitializerMemberValue -> {
-                        // Directly access array elements to preserve individual annotation values
+                        // Array case: directly access elements to preserve individual annotation values
                         valueAttribute.initializers.filterIsInstance<PsiAnnotation>()
                     }
                     is PsiAnnotation -> {
@@ -155,79 +155,61 @@ class DgsComponentProcessor(
                         listOf(valueAttribute)
                     }
                     else -> {
-                        // Fallback to tree search
+                        // Fallback: search the tree if attribute structure is unexpected
                         PsiTreeUtil.findChildrenOfType(listAnnotation, PsiAnnotation::class.java).toList()
                     }
                 }
 
-                annotations.forEach {
-                    val parentType = DgsDataFetcher.getParentType(it)
-                    val field = DgsDataFetcher.getFieldFromAnnotation(it)?:uMethod.name
-
-                    //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
-                    if (parentType != null) {
-                        val dgsDataFetcher = DgsDataFetcher(
-                            parentType,
-                            field,
-                            methodPsi,
-                            it,
-                            uAnnotation.sourcePsi?.containingFile!!,
-                            graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
-                        )
-
-                        dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
-
-                        // If parentType is an interface, also create entries for all implementing types
-                        val implementingTypes = graphQLSchemaRegistry.getTypesImplementingInterface(uMethod, parentType)
-                        implementingTypes.forEach { implementingType ->
-                            val implDgsDataFetcher = DgsDataFetcher(
-                                implementingType,
-                                field,
-                                methodPsi,
-                                it,
-                                uAnnotation.sourcePsi?.containingFile!!,
-                                graphQLSchemaRegistry.psiForSchemaType(uMethod, implementingType, field)?.orNull()
-                            )
-                            dgsComponentIndex.dataFetchers.add(implDgsDataFetcher)
-                        }
-                    }
-                }
+                annotations.forEach { createDataFetchersForAnnotation(uMethod, methodPsi, it, uAnnotation.sourcePsi?.containingFile!!) }
             }
         } else {
-            // Individual @DgsData annotation - process it directly
+            // Individual @DgsData annotation - process directly to preserve PSI element for navigation
             // This handles both single @DgsData and implicit @Repeatable cases
             val annotationPsi = uAnnotation.sourcePsi as? PsiAnnotation
             if (annotationPsi != null) {
-                val parentType = DgsDataFetcher.getParentType(annotationPsi)
-                val field = DgsDataFetcher.getFieldFromAnnotation(annotationPsi) ?: uMethod.name
+                createDataFetchersForAnnotation(uMethod, methodPsi, annotationPsi, uAnnotation.sourcePsi?.containingFile!!)
+            }
+        }
+    }
 
-                //Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
-                if (parentType != null) {
-                    val dgsDataFetcher = DgsDataFetcher(
-                        parentType,
-                        field,
-                        methodPsi,
-                        annotationPsi,
-                        uAnnotation.sourcePsi?.containingFile!!,
-                        graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
-                    )
+    /**
+     * Creates DgsDataFetcher entries for a single @DgsData annotation.
+     * Also creates entries for all types implementing the interface if parentType is an interface.
+     */
+    private fun createDataFetchersForAnnotation(
+        uMethod: UMethod,
+        methodPsi: PsiElement,
+        annotation: PsiAnnotation,
+        containingFile: com.intellij.psi.PsiFile
+    ) {
+        val parentType = DgsDataFetcher.getParentType(annotation)
+        val field = DgsDataFetcher.getFieldFromAnnotation(annotation) ?: uMethod.name
 
-                    dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+        // Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
+        if (parentType != null) {
+            val dgsDataFetcher = DgsDataFetcher(
+                parentType,
+                field,
+                methodPsi,
+                annotation,
+                containingFile,
+                graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
+            )
 
-                    // If parentType is an interface, also create entries for all implementing types
-                    val implementingTypes = graphQLSchemaRegistry.getTypesImplementingInterface(uMethod, parentType)
-                    implementingTypes.forEach { implementingType ->
-                        val implDgsDataFetcher = DgsDataFetcher(
-                            implementingType,
-                            field,
-                            methodPsi,
-                            annotationPsi,
-                            uAnnotation.sourcePsi?.containingFile!!,
-                            graphQLSchemaRegistry.psiForSchemaType(uMethod, implementingType, field)?.orNull()
-                        )
-                        dgsComponentIndex.dataFetchers.add(implDgsDataFetcher)
-                    }
-                }
+            dgsComponentIndex.dataFetchers.add(dgsDataFetcher)
+
+            // If parentType is an interface, also create entries for all implementing types
+            val implementingTypes = graphQLSchemaRegistry.getTypesImplementingInterface(uMethod, parentType)
+            implementingTypes.forEach { implementingType ->
+                val implDgsDataFetcher = DgsDataFetcher(
+                    implementingType,
+                    field,
+                    methodPsi,
+                    annotation,
+                    containingFile,
+                    graphQLSchemaRegistry.psiForSchemaType(uMethod, implementingType, field)?.orNull()
+                )
+                dgsComponentIndex.dataFetchers.add(implDgsDataFetcher)
             }
         }
     }
