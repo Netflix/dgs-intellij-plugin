@@ -38,6 +38,7 @@ data class DgsDataFetcher(
             "com.netflix.graphql.dgs.DgsMutation",
             "com.netflix.graphql.dgs.DgsSubscription",
             "com.netflix.graphql.dgs.DgsData",
+            "com.netflix.graphql.dgs.DgsData.List",
         )
 
         fun isDataFetcherAnnotation(annotation: PsiAnnotation): Boolean {
