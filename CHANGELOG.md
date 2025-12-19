@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+## [1.4.7]
+### Fixed
+* Align graphQL gutter icons to their schema field/type and not comment
+* Create Unresolved GraphQL Element gutter icon for types not mapped to DataFetcher/Field Resolver. May Opt out via DGS gutter icon config in IntelliJ.
+
 ## [1.4.6]
 ### Fixed
 * Code Linkage works for Implicit and Explicit @DgsData.List
