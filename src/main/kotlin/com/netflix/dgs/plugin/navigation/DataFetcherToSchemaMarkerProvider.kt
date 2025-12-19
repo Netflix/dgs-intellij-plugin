@@ -19,7 +19,6 @@ package com.netflix.dgs.plugin.navigation
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
-import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.DgsConstants
@@ -50,8 +49,7 @@ class DataFetcherToSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
 
                 if (dgsDataFetcher?.schemaPsi != null || dgsEntityFetcher?.schemaPsi != null) {
 
-                    // Use nameReferenceElement for annotations to get the annotation name identifier, ignoring any preceding comments
-                    val psiLeaf = (element as? PsiAnnotation)?.nameReferenceElement ?: PsiTreeUtil.getDeepestFirst(element)
+                    val psiLeaf = PsiTreeUtil.getDeepestFirst(element)
                     val target = dgsDataFetcher?.schemaPsi?: dgsEntityFetcher!!.schemaPsi
                     val builder =
                         NavigationGutterIconBuilder.create(DgsConstants.dgsIcon)
