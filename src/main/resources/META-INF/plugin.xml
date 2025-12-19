@@ -52,6 +52,7 @@
 
         <codeInsight.lineMarkerProvider language="UAST" implementationClass="com.netflix.dgs.plugin.navigation.DataFetcherToSchemaMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.SchemaToDataFetcherMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.UnresolvedSchemaMarkerProvider"/>
 
         <implicitUsageProvider implementation="com.netflix.dgs.plugin.provider.DgsImplicitUsageProvider"/>
 
