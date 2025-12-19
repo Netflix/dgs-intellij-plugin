@@ -20,6 +20,7 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.lang.jsgraphql.psi.*
+import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.DgsConstants
@@ -34,7 +35,8 @@ class SchemaToDataFetcherMarkerProvider : RelatedItemLineMarkerProvider() {
         if(!dgsService.isDgsProject(element.project)) {
             return
         }
-        val psiLeaf = PsiTreeUtil.getDeepestFirst(element)
+        // Find the identifier child element to pin the gutter icon, ignoring any preceding comments
+        val psiLeaf = PsiTreeUtil.findChildOfType(element, GraphQLIdentifierImpl::class.java) ?: PsiTreeUtil.getDeepestFirst(element)
 
         val iconBuilder = when (element) {
             is GraphQLFieldDefinition -> {
