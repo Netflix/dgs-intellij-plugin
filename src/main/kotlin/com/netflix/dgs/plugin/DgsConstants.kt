@@ -35,4 +35,5 @@ object DgsConstants {
     )
 
     val dgsIcon = IconLoader.getIcon("/icons/dgs.svg", this::class.java)
+    val dgsUnresolvedIcon = IconLoader.getIcon("/icons/dgs-gray.svg", this::class.java)
 }
