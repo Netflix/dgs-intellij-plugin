@@ -17,6 +17,7 @@
 package com.netflix.dgs.plugin.navigation
 
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler
+import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
@@ -99,15 +100,18 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
             .firstOrNull { it.parentType == typeName && it.schemaPsi != null }
         val fieldPsi = fetcher?.schemaPsi ?: return null
         val typePsi = fieldPsi.parent?.parent ?: fieldPsi.parent ?: return null
-        return arrayOf(typePsi)
+        return arrayOf(nameIdentifier(typePsi))
     }
 
     private fun resolveField(parentType: String, fieldName: String, dgsService: DgsService): Array<PsiElement>? {
         val fetcher = dgsService.dgsComponentIndex.dataFetchers
             .firstOrNull { it.parentType == parentType && it.field == fieldName && it.schemaPsi != null }
         val schemaPsi = fetcher?.schemaPsi ?: return null
-        return arrayOf(schemaPsi)
+        return arrayOf(nameIdentifier(schemaPsi))
     }
+
+    private fun nameIdentifier(element: PsiElement): PsiElement =
+        PsiTreeUtil.findChildOfType(element, GraphQLIdentifierImpl::class.java) ?: element
 
     private fun resolveParentType(annotation: PsiElement, shortName: String): String? =
         when (shortName) {
