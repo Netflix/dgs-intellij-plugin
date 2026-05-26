@@ -57,6 +57,7 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
     private data class AnnotationContext(val attrName: String, val value: String, val annotation: PsiElement)
 
     private fun extractContext(element: PsiElement): AnnotationContext? {
+        // sourceElement is the cursor's leaf PSI token; walk up to the enclosing string literal.
         val stringElement: PsiElement =
             PsiTreeUtil.getParentOfType(element, KtStringTemplateExpression::class.java, false)
                 ?: PsiTreeUtil.getParentOfType(element, PsiLiteralExpression::class.java, false)
@@ -81,6 +82,7 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
     private fun stringValue(element: PsiElement): String? = when (element) {
         is PsiLiteralExpression -> element.value as? String
         is KtStringTemplateExpression ->
+            // Skip interpolated strings ("${foo}") — dynamic values can't be matched against the static index.
             if (element.hasInterpolation()) null
             else element.entries.firstOrNull()?.text
         else -> null
@@ -99,6 +101,7 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
         val fetcher = dgsService.dgsComponentIndex.dataFetchers
             .firstOrNull { it.parentType == typeName && it.schemaPsi != null }
         val fieldPsi = fetcher?.schemaPsi ?: return null
+        // Walk field → GraphQLFieldsDefinition → GraphQLObjectTypeDefinition.
         val typePsi = fieldPsi.parent?.parent ?: fieldPsi.parent ?: return null
         return arrayOf(nameIdentifier(typePsi))
     }
@@ -110,6 +113,7 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
         return arrayOf(nameIdentifier(schemaPsi))
     }
 
+    // Returning the inner identifier (rather than the whole def) gives IntelliJ a clean hover label.
     private fun nameIdentifier(element: PsiElement): PsiElement =
         PsiTreeUtil.findChildOfType(element, GraphQLIdentifierImpl::class.java) ?: element
 
