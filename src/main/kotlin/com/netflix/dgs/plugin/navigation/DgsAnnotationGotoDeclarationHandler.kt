@@ -45,7 +45,8 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
         if (!isDgsDataAnnotation(context.annotation)) return null
 
         return when (context.attrName) {
-            "parentType", "typename" -> resolveType(context.value, dgsService)
+            "parentType" -> resolveType(context.value, dgsService)
+            "name" -> if (shortName(context.annotation) == "DgsEntityFetcher") resolveType(context.value, dgsService) else null
             "field" -> {
                 val parentType = resolveParentType(context.annotation, shortName(context.annotation)) ?: return null
                 resolveField(parentType, context.value, dgsService)
