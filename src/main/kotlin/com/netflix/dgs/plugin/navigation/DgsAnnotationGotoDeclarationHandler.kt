@@ -19,13 +19,13 @@ package com.netflix.dgs.plugin.navigation
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler
 import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.openapi.editor.Editor
-import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameValuePair
 import com.intellij.psi.util.PsiTreeUtil
+import com.netflix.dgs.plugin.DgsDataFetcher
+import com.netflix.dgs.plugin.DgsEntityFetcher
 import com.netflix.dgs.plugin.services.DgsService
 import com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry
-import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtValueArgument
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UExpression
@@ -46,22 +46,25 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
         if (!dgsService.isDgsProject(project)) return null
 
         val context = extractContext(sourceElement) ?: return null
-        if (!isDgsDataAnnotation(context.annotation)) return null
+        val uAnnotation = context.annotationPsi.toUElement() as? UAnnotation ?: return null
+        if (!isDgsAnnotation(uAnnotation)) return null
 
         val schemaRegistry = project.getService(GraphQLSchemaRegistry::class.java)
 
         return when (context.attrName) {
             "parentType" -> resolveType(context.value, sourceElement, schemaRegistry)
-            "name" -> if (shortName(context.annotation) == "DgsEntityFetcher") resolveType(context.value, sourceElement, schemaRegistry) else null
+            "name" -> if (uAnnotation.qualifiedName == DGS_ENTITY_FETCHER_FQN) {
+                resolveType(context.value, sourceElement, schemaRegistry)
+            } else null
             "field" -> {
-                val parentType = resolveParentType(context.annotation, shortName(context.annotation)) ?: return null
+                val parentType = resolveParentType(uAnnotation) ?: return null
                 resolveField(parentType, context.value, sourceElement, schemaRegistry)
             }
             else -> null
         }
     }
 
-    private data class AnnotationContext(val attrName: String, val value: String, val annotation: PsiElement)
+    private data class AnnotationContext(val attrName: String, val value: String, val annotationPsi: PsiElement)
 
     private fun extractContext(element: PsiElement): AnnotationContext? {
         // Java: cursor inside a @Foo(attr = ...) parameter
@@ -70,7 +73,7 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
             val valueExpr = javaPair.value ?: return null
             // Ignore clicks on the attribute name; only resolve when cursor is in the value.
             if (!PsiTreeUtil.isAncestor(valueExpr, element, false)) return null
-            val annotation = javaPair.parent?.parent as? PsiAnnotation ?: return null
+            val annotation = javaPair.parent?.parent ?: return null
             // UAST evaluates literals and constant references (Constants.MOVIE_TYPE) uniformly.
             val value = (valueExpr.toUElement() as? UExpression)?.evaluateString() ?: return null
             return AnnotationContext(javaPair.name ?: "value", value, annotation)
@@ -80,7 +83,7 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
         if (ktArg != null) {
             val valueExpr = ktArg.getArgumentExpression() ?: return null
             if (!PsiTreeUtil.isAncestor(valueExpr, element, false)) return null
-            val annotation = ktArg.parent?.parent as? KtAnnotationEntry ?: return null
+            val annotation = ktArg.parent?.parent ?: return null
             val value = (valueExpr.toUElement() as? UExpression)?.evaluateString() ?: return null
             val argName = ktArg.getArgumentName()?.asName?.identifier ?: "value"
             return AnnotationContext(argName, value, annotation)
@@ -88,14 +91,9 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
         return null
     }
 
-    private fun shortName(annotation: PsiElement): String = when (annotation) {
-        is PsiAnnotation -> annotation.qualifiedName?.substringAfterLast('.') ?: ""
-        is KtAnnotationEntry -> annotation.shortName?.identifier ?: ""
-        else -> ""
-    }
-
-    private fun isDgsDataAnnotation(annotation: PsiElement): Boolean =
-        shortName(annotation) in DGS_SHORT_NAMES
+    private fun isDgsAnnotation(annotation: UAnnotation): Boolean =
+        DgsDataFetcher.isDataFetcherAnnotation(annotation) ||
+            DgsEntityFetcher.isEntityFetcherAnnotation(annotation)
 
     private fun resolveType(
         typeName: String,
@@ -120,22 +118,15 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
     private fun nameIdentifier(element: PsiElement): PsiElement =
         PsiTreeUtil.findChildOfType(element, GraphQLIdentifierImpl::class.java) ?: element
 
-    private fun resolveParentType(annotation: PsiElement, shortName: String): String? =
-        when (shortName) {
-            "DgsQuery" -> "Query"
-            "DgsMutation" -> "Mutation"
-            "DgsSubscription" -> "Subscription"
-            else -> siblingValue(annotation, "parentType")
+    private fun resolveParentType(annotation: UAnnotation): String? =
+        when (annotation.qualifiedName) {
+            "com.netflix.graphql.dgs.DgsQuery" -> "Query"
+            "com.netflix.graphql.dgs.DgsMutation" -> "Mutation"
+            "com.netflix.graphql.dgs.DgsSubscription" -> "Subscription"
+            else -> annotation.findAttributeValue("parentType")?.evaluateString()
         }
 
-    private fun siblingValue(annotation: PsiElement, attrName: String): String? {
-        val uAnnotation = annotation.toUElement() as? UAnnotation ?: return null
-        return uAnnotation.findAttributeValue(attrName)?.evaluateString()
-    }
-
     companion object {
-        private val DGS_SHORT_NAMES = setOf(
-            "DgsData", "DgsQuery", "DgsMutation", "DgsSubscription", "DgsEntityFetcher"
-        )
+        private const val DGS_ENTITY_FETCHER_FQN = "com.netflix.graphql.dgs.DgsEntityFetcher"
     }
 }
