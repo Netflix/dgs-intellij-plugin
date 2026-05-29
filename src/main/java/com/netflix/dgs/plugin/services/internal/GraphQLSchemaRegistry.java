@@ -73,6 +73,19 @@ public class GraphQLSchemaRegistry {
         return Optional.empty();
     }
 
+    public Optional<PsiElement> psiForType(@NotNull PsiElement psiElement, @NotNull String typeName) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
+        Optional<ObjectTypeDefinition> objectType = getTypeDefinition(registry, typeName);
+        if (objectType.isPresent()) {
+            return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(objectType.get().getSourceLocation(), psiElement.getProject()));
+        }
+        Optional<InterfaceTypeDefinition> interfaceType = getInterfaceTypeDefinition(registry, typeName);
+        if (interfaceType.isPresent()) {
+            return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(interfaceType.get().getSourceLocation(), psiElement.getProject()));
+        }
+        return Optional.empty();
+    }
+
     public Optional<PsiElement> psiForDirective(@NotNull PsiElement psiElement, @NotNull String name) {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         Optional<DirectiveDefinition> directiveDefinition = registry.getDirectiveDefinition(name);

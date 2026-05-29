@@ -54,6 +54,8 @@
         <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.SchemaToDataFetcherMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="GraphQL" implementationClass="com.netflix.dgs.plugin.navigation.UnresolvedSchemaMarkerProvider"/>
 
+        <gotoDeclarationHandler implementation="com.netflix.dgs.plugin.navigation.DgsAnnotationGotoDeclarationHandler"/>
+
         <implicitUsageProvider implementation="com.netflix.dgs.plugin.provider.DgsImplicitUsageProvider"/>
 
         <treeStructureProvider implementation="com.netflix.dgs.plugin.provider.DgsProjectStructureProvider"/>
