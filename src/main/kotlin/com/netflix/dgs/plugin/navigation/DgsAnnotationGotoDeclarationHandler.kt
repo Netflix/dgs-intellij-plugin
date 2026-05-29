@@ -21,13 +21,16 @@ import com.intellij.lang.jsgraphql.psi.impl.GraphQLIdentifierImpl
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiNameValuePair
 import com.intellij.psi.util.PsiTreeUtil
 import com.netflix.dgs.plugin.services.DgsService
+import com.netflix.dgs.plugin.services.internal.GraphQLSchemaRegistry
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
-import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtValueArgument
+import org.jetbrains.uast.UAnnotation
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.evaluateString
+import org.jetbrains.uast.toUElement
 
 class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
 
@@ -38,18 +41,21 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
     ): Array<PsiElement>? {
         sourceElement ?: return null
 
-        val dgsService = sourceElement.project.getService(DgsService::class.java)
-        if (!dgsService.isDgsProject(sourceElement.project)) return null
+        val project = sourceElement.project
+        val dgsService = project.getService(DgsService::class.java)
+        if (!dgsService.isDgsProject(project)) return null
 
         val context = extractContext(sourceElement) ?: return null
         if (!isDgsDataAnnotation(context.annotation)) return null
 
+        val schemaRegistry = project.getService(GraphQLSchemaRegistry::class.java)
+
         return when (context.attrName) {
-            "parentType" -> resolveType(context.value, dgsService)
-            "name" -> if (shortName(context.annotation) == "DgsEntityFetcher") resolveType(context.value, dgsService) else null
+            "parentType" -> resolveType(context.value, sourceElement, schemaRegistry)
+            "name" -> if (shortName(context.annotation) == "DgsEntityFetcher") resolveType(context.value, sourceElement, schemaRegistry) else null
             "field" -> {
                 val parentType = resolveParentType(context.annotation, shortName(context.annotation)) ?: return null
-                resolveField(parentType, context.value, dgsService)
+                resolveField(parentType, context.value, sourceElement, schemaRegistry)
             }
             else -> null
         }
@@ -58,35 +64,28 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
     private data class AnnotationContext(val attrName: String, val value: String, val annotation: PsiElement)
 
     private fun extractContext(element: PsiElement): AnnotationContext? {
-        // sourceElement is the cursor's leaf PSI token; walk up to the enclosing string literal.
-        val stringElement: PsiElement =
-            PsiTreeUtil.getParentOfType(element, KtStringTemplateExpression::class.java, false)
-                ?: PsiTreeUtil.getParentOfType(element, PsiLiteralExpression::class.java, false)
-                ?: return null
-
-        val value = stringValue(stringElement) ?: return null
-
-        if (stringElement is PsiLiteralExpression) {
-            val pair = stringElement.parent as? PsiNameValuePair ?: return null
-            val annotation = pair.parent?.parent as? PsiAnnotation ?: return null
-            return AnnotationContext(pair.name ?: "value", value, annotation)
+        // Java: cursor inside a @Foo(attr = ...) parameter
+        val javaPair = PsiTreeUtil.getParentOfType(element, PsiNameValuePair::class.java, false)
+        if (javaPair != null) {
+            val valueExpr = javaPair.value ?: return null
+            // Ignore clicks on the attribute name; only resolve when cursor is in the value.
+            if (!PsiTreeUtil.isAncestor(valueExpr, element, false)) return null
+            val annotation = javaPair.parent?.parent as? PsiAnnotation ?: return null
+            // UAST evaluates literals and constant references (Constants.MOVIE_TYPE) uniformly.
+            val value = (valueExpr.toUElement() as? UExpression)?.evaluateString() ?: return null
+            return AnnotationContext(javaPair.name ?: "value", value, annotation)
         }
-        if (stringElement is KtStringTemplateExpression) {
-            val arg = stringElement.parent as? KtValueArgument ?: return null
-            val annotation = arg.parent?.parent as? KtAnnotationEntry ?: return null
-            val argName = arg.getArgumentName()?.asName?.identifier ?: "value"
+        // Kotlin: cursor inside a @Foo(attr = ...) argument
+        val ktArg = PsiTreeUtil.getParentOfType(element, KtValueArgument::class.java, false)
+        if (ktArg != null) {
+            val valueExpr = ktArg.getArgumentExpression() ?: return null
+            if (!PsiTreeUtil.isAncestor(valueExpr, element, false)) return null
+            val annotation = ktArg.parent?.parent as? KtAnnotationEntry ?: return null
+            val value = (valueExpr.toUElement() as? UExpression)?.evaluateString() ?: return null
+            val argName = ktArg.getArgumentName()?.asName?.identifier ?: "value"
             return AnnotationContext(argName, value, annotation)
         }
         return null
-    }
-
-    private fun stringValue(element: PsiElement): String? = when (element) {
-        is PsiLiteralExpression -> element.value as? String
-        is KtStringTemplateExpression ->
-            // Skip interpolated strings ("${foo}") — dynamic values can't be matched against the static index.
-            if (element.hasInterpolation()) null
-            else element.entries.firstOrNull()?.text
-        else -> null
     }
 
     private fun shortName(annotation: PsiElement): String = when (annotation) {
@@ -98,20 +97,23 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
     private fun isDgsDataAnnotation(annotation: PsiElement): Boolean =
         shortName(annotation) in DGS_SHORT_NAMES
 
-    private fun resolveType(typeName: String, dgsService: DgsService): Array<PsiElement>? {
-        val fetcher = dgsService.dgsComponentIndex.dataFetchers
-            .firstOrNull { it.parentType == typeName && it.schemaPsi != null }
-        val fieldPsi = fetcher?.schemaPsi ?: return null
-        // Walk field → GraphQLFieldsDefinition → GraphQLObjectTypeDefinition.
-        val typePsi = fieldPsi.parent?.parent ?: fieldPsi.parent ?: return null
+    private fun resolveType(
+        typeName: String,
+        sourceElement: PsiElement,
+        schemaRegistry: GraphQLSchemaRegistry
+    ): Array<PsiElement>? {
+        val typePsi = schemaRegistry.psiForType(sourceElement, typeName).orElse(null) ?: return null
         return arrayOf(nameIdentifier(typePsi))
     }
 
-    private fun resolveField(parentType: String, fieldName: String, dgsService: DgsService): Array<PsiElement>? {
-        val fetcher = dgsService.dgsComponentIndex.dataFetchers
-            .firstOrNull { it.parentType == parentType && it.field == fieldName && it.schemaPsi != null }
-        val schemaPsi = fetcher?.schemaPsi ?: return null
-        return arrayOf(nameIdentifier(schemaPsi))
+    private fun resolveField(
+        parentType: String,
+        fieldName: String,
+        sourceElement: PsiElement,
+        schemaRegistry: GraphQLSchemaRegistry
+    ): Array<PsiElement>? {
+        val fieldPsi = schemaRegistry.psiForSchemaType(sourceElement, parentType, fieldName)?.orElse(null) ?: return null
+        return arrayOf(nameIdentifier(fieldPsi))
     }
 
     // Returning the inner identifier (rather than the whole def) gives IntelliJ a clean hover label.
@@ -126,14 +128,9 @@ class DgsAnnotationGotoDeclarationHandler : GotoDeclarationHandler {
             else -> siblingValue(annotation, "parentType")
         }
 
-    private fun siblingValue(annotation: PsiElement, attrName: String): String? = when (annotation) {
-        is PsiAnnotation -> (annotation.findAttributeValue(attrName) as? PsiLiteralExpression)?.value as? String
-        is KtAnnotationEntry -> annotation.valueArguments
-            .firstOrNull { it.getArgumentName()?.asName?.identifier == attrName }
-            ?.getArgumentExpression()
-            ?.let { it as? KtStringTemplateExpression }
-            ?.entries?.firstOrNull()?.text
-        else -> null
+    private fun siblingValue(annotation: PsiElement, attrName: String): String? {
+        val uAnnotation = annotation.toUElement() as? UAnnotation ?: return null
+        return uAnnotation.findAttributeValue(attrName)?.evaluateString()
     }
 
     companion object {
