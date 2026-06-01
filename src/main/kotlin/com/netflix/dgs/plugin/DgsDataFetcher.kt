@@ -49,15 +49,18 @@ data class DgsDataFetcher(
             return annotationQualifiedNames.contains(annotation.qualifiedName)
         }
 
-        fun getParentType(annotation: PsiAnnotation): String? {
+        fun getParentType(annotation: UAnnotation): String? {
             return when (annotation.qualifiedName) {
                 "com.netflix.graphql.dgs.DgsQuery" -> "Query"
                 "com.netflix.graphql.dgs.DgsMutation" -> "Mutation"
                 "com.netflix.graphql.dgs.DgsSubscription" -> "Subscription"
-                "com.netflix.graphql.dgs.DgsData" -> (annotation.toUElement() as UAnnotation).findAttributeValue("parentType")
-                    ?.evaluateString()
+                "com.netflix.graphql.dgs.DgsData" -> annotation.findAttributeValue("parentType")?.evaluateString()
                 else -> throw IllegalArgumentException("Annotation ${annotation.qualifiedName} is not a data fetcher annotation")
             }
+        }
+
+        fun getParentType(annotation: PsiAnnotation): String? {
+            return (annotation.toUElement() as? UAnnotation)?.let { getParentType(it) }
         }
 
         fun getParentType(method: PsiMethod): String? {
@@ -69,11 +72,12 @@ data class DgsDataFetcher(
             (method.annotations.find { a -> isDataFetcherAnnotation(a) }
                 ?: throw IllegalArgumentException("Method ${method.name} is not a data fetcher"))
 
+        fun getFieldFromAnnotation(annotation: UAnnotation): String? {
+            return annotation.findAttributeValue("field")?.evaluateString()?.takeIf { it.isNotEmpty() }
+        }
+
         fun getFieldFromAnnotation(annotation: PsiAnnotation): String? {
-            return if (annotation.hasAttribute("field")) {
-                (annotation.toUElement() as UAnnotation).findAttributeValue("field")?.evaluateString()
-            }
-            else null
+            return (annotation.toUElement() as? UAnnotation)?.let { getFieldFromAnnotation(it) }
         }
 
         fun getField(method: PsiMethod): String {

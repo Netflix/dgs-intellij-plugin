@@ -28,6 +28,7 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.toUElement
 
 class DgsComponentProcessor(
     private val graphQLSchemaRegistry: GraphQLSchemaRegistry,
@@ -160,15 +161,17 @@ class DgsComponentProcessor(
                     }
                 }
 
-                annotations.forEach { createDataFetchersForAnnotation(uMethod, methodPsi, it, uAnnotation.sourcePsi?.containingFile!!) }
+                annotations.forEach { psiAnnotation ->
+                    val childUAnnotation = psiAnnotation.toUElement() as? UAnnotation ?: return@forEach
+                    createDataFetchersForAnnotation(uMethod, methodPsi, childUAnnotation, psiAnnotation)
+                }
             }
         } else {
-            // Individual @DgsData annotation - process directly to preserve PSI element for navigation
-            // This handles both single @DgsData and implicit @Repeatable cases
-            val annotationPsi = uAnnotation.sourcePsi as? PsiAnnotation
-            if (annotationPsi != null) {
-                createDataFetchersForAnnotation(uMethod, methodPsi, annotationPsi, uAnnotation.sourcePsi?.containingFile!!)
-            }
+            // Individual annotation — works for both Java (sourcePsi is PsiAnnotation) and
+            // Kotlin (sourcePsi is KtAnnotationEntry). Store sourcePsi directly so that the
+            // psiAnnotation identity comparison in marker providers works for both languages.
+            val annotationSourcePsi = uAnnotation.sourcePsi ?: return
+            createDataFetchersForAnnotation(uMethod, methodPsi, uAnnotation, annotationSourcePsi)
         }
     }
 
@@ -179,11 +182,12 @@ class DgsComponentProcessor(
     private fun createDataFetchersForAnnotation(
         uMethod: UMethod,
         methodPsi: PsiElement,
-        annotation: PsiAnnotation,
-        containingFile: com.intellij.psi.PsiFile
+        uAnnotation: UAnnotation,
+        annotationSourcePsi: PsiElement
     ) {
-        val parentType = DgsDataFetcher.getParentType(annotation)
-        val field = DgsDataFetcher.getFieldFromAnnotation(annotation) ?: uMethod.name
+        val parentType = DgsDataFetcher.getParentType(uAnnotation)
+        val field = DgsDataFetcher.getFieldFromAnnotation(uAnnotation) ?: uMethod.name
+        val containingFile = annotationSourcePsi.containingFile
 
         // Because we use the stubs index, we might process a @DgsQuery annotation as @DgsData as well, which won't have parentType.
         if (parentType != null) {
@@ -191,7 +195,7 @@ class DgsComponentProcessor(
                 parentType,
                 field,
                 methodPsi,
-                annotation,
+                annotationSourcePsi,
                 containingFile,
                 graphQLSchemaRegistry.psiForSchemaType(uMethod, parentType, field)?.orNull()
             )
@@ -205,7 +209,7 @@ class DgsComponentProcessor(
                     implementingType,
                     field,
                     methodPsi,
-                    annotation,
+                    annotationSourcePsi,
                     containingFile,
                     graphQLSchemaRegistry.psiForSchemaType(uMethod, implementingType, field)?.orNull()
                 )
