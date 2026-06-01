@@ -73,7 +73,7 @@ data class DgsDataFetcher(
                 ?: throw IllegalArgumentException("Method ${method.name} is not a data fetcher"))
 
         fun getFieldFromAnnotation(annotation: UAnnotation): String? {
-            return annotation.findAttributeValue("field")?.evaluateString()
+            return annotation.findAttributeValue("field")?.evaluateString()?.takeIf { it.isNotEmpty() }
         }
 
         fun getFieldFromAnnotation(annotation: PsiAnnotation): String? {

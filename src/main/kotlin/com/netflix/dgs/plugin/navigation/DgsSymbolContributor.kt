@@ -22,11 +22,12 @@ import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.parentOfType
 import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.services.DgsService
+import org.jetbrains.uast.UClass
+import org.jetbrains.uast.getParentOfType
+import org.jetbrains.uast.toUElement
 import javax.swing.Icon
 
 class DgsSymbolContributor : ChooseByNameContributor {
@@ -44,7 +45,10 @@ class DgsSymbolContributor : ChooseByNameContributor {
         val dgsService = project.getService(DgsService::class.java)
         return dgsService.dgsComponentIndex.getAllComponents()
             .filter { it.name == name }
-            .map { DgsComponentNavigationItem(it.name, project, it.psiAnnotation, it.psiAnnotation.parentOfType<PsiClass>()?.qualifiedName, it.type.description) }
+            .map {
+                val qualifier = it.psiAnnotation.toUElement()?.getParentOfType<UClass>()?.qualifiedName
+                DgsComponentNavigationItem(it.name, project, it.psiAnnotation, qualifier, it.type.description)
+            }
             .toTypedArray()
     }
 }
