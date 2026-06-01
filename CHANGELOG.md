@@ -3,6 +3,11 @@
 # dgs-intellij-plugin Changelog
 
 ## [Unreleased]
+## [1.5.0]
+### Added
+* Cmd+click navigation on @DgsData annotation strings
+### Fixed
+* Fix Kotlin @DgsData fetchers never indexed due to PsiAnnotation cast
 
 ## [1.4.7]
 ### Fixed
