@@ -21,6 +21,8 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.lang.jsgraphql.icons.GraphQLIcons
 import com.intellij.lang.jsgraphql.types.schema.idl.TypeUtil
@@ -75,16 +77,16 @@ class DgsAnnotationCompletionContributor : CompletionContributor() {
             when (ctx.attrName) {
                 "parentType" -> {
                     registry.objectTypeNames(position).forEach {
-                        result.addElement(LookupElementBuilder.create(it).withIcon(GraphQLIcons.Schema.Type))
+                        result.addElement(boosted(LookupElementBuilder.create(it).withIcon(GraphQLIcons.Schema.Type)))
                     }
                     registry.interfaceTypeNames(position).forEach {
-                        result.addElement(LookupElementBuilder.create(it).withIcon(GraphQLIcons.Schema.Interface))
+                        result.addElement(boosted(LookupElementBuilder.create(it).withIcon(GraphQLIcons.Schema.Interface)))
                     }
                 }
                 "name" -> {
                     if (uAnnotation.qualifiedName == DGS_ENTITY_FETCHER_FQN) {
                         registry.entityTypeNames(position).forEach {
-                            result.addElement(LookupElementBuilder.create(it).withIcon(GraphQLIcons.Schema.Type))
+                            result.addElement(boosted(LookupElementBuilder.create(it).withIcon(GraphQLIcons.Schema.Type)))
                         }
                     }
                 }
@@ -92,9 +94,11 @@ class DgsAnnotationCompletionContributor : CompletionContributor() {
                     val parentType = resolveParentType(uAnnotation) ?: return
                     registry.fieldDefinitions(position, parentType).forEach { f ->
                         result.addElement(
-                            LookupElementBuilder.create(f.name)
-                                .withIcon(GraphQLIcons.Schema.Field)
-                                .withTypeText(TypeUtil.simplePrint(f.type))
+                            boosted(
+                                LookupElementBuilder.create(f.name)
+                                    .withIcon(GraphQLIcons.Schema.Field)
+                                    .withTypeText(TypeUtil.simplePrint(f.type))
+                            )
                         )
                     }
                 }
@@ -106,6 +110,12 @@ class DgsAnnotationCompletionContributor : CompletionContributor() {
 
     companion object {
         private const val DGS_ENTITY_FETCHER_FQN = "com.netflix.graphql.dgs.DgsEntityFetcher"
+
+        // Rank schema-aware items above IntelliJ's generic word/file completion.
+        private const val PRIORITY = 100.0
+
+        private fun boosted(element: LookupElement): LookupElement =
+            PrioritizedLookupElement.withPriority(element, PRIORITY)
 
         private fun extractContext(element: PsiElement): AnnotationContext? {
             // Java

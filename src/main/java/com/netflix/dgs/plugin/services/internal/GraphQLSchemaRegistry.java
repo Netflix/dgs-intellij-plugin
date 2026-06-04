@@ -95,11 +95,11 @@ public class GraphQLSchemaRegistry {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         Set<String> names = new LinkedHashSet<>();
         registry.types().forEach((name, def) -> {
-            if (def instanceof ObjectTypeDefinition) {
+            if (def instanceof ObjectTypeDefinition && !isIntrospectionName(name)) {
                 names.add(name);
             }
         });
-        names.addAll(registry.objectTypeExtensions().keySet());
+        registry.objectTypeExtensions().keySet().stream().filter(n -> !isIntrospectionName(n)).forEach(names::add);
         return new ArrayList<>(names);
     }
 
@@ -107,11 +107,11 @@ public class GraphQLSchemaRegistry {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         Set<String> names = new LinkedHashSet<>();
         registry.types().forEach((name, def) -> {
-            if (def instanceof InterfaceTypeDefinition) {
+            if (def instanceof InterfaceTypeDefinition && !isIntrospectionName(name)) {
                 names.add(name);
             }
         });
-        names.addAll(registry.interfaceTypeExtensions().keySet());
+        registry.interfaceTypeExtensions().keySet().stream().filter(n -> !isIntrospectionName(n)).forEach(names::add);
         return new ArrayList<>(names);
     }
 
@@ -119,11 +119,14 @@ public class GraphQLSchemaRegistry {
         TypeDefinitionRegistry registry = getRegistry(psiElement);
         Set<String> names = new LinkedHashSet<>();
         registry.types().forEach((name, def) -> {
-            if (def instanceof ObjectTypeDefinition && hasKeyDirective(((ObjectTypeDefinition) def).getDirectives())) {
+            if (def instanceof ObjectTypeDefinition
+                    && !isIntrospectionName(name)
+                    && hasKeyDirective(((ObjectTypeDefinition) def).getDirectives())) {
                 names.add(name);
             }
         });
         registry.objectTypeExtensions().forEach((name, exts) -> {
+            if (isIntrospectionName(name)) return;
             for (ObjectTypeExtensionDefinition ext : exts) {
                 if (hasKeyDirective(ext.getDirectives())) {
                     names.add(name);
@@ -132,6 +135,12 @@ public class GraphQLSchemaRegistry {
             }
         });
         return new ArrayList<>(names);
+    }
+
+    // GraphQL spec reserves names starting with "__" for introspection metadata
+    // (e.g., __Schema, __Type, __Directive). Filter them from user-facing completion.
+    private boolean isIntrospectionName(String name) {
+        return name != null && name.startsWith("__");
     }
 
     public List<FieldDefinition> fieldDefinitions(@NotNull PsiElement psiElement, @NotNull String typeName) {
