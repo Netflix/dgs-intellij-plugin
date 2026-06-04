@@ -56,6 +56,9 @@
 
         <gotoDeclarationHandler implementation="com.netflix.dgs.plugin.navigation.DgsAnnotationGotoDeclarationHandler"/>
 
+        <completion.contributor language="JAVA" implementationClass="com.netflix.dgs.plugin.completion.DgsAnnotationCompletionContributor"/>
+        <completion.contributor language="kotlin" implementationClass="com.netflix.dgs.plugin.completion.DgsAnnotationCompletionContributor"/>
+
         <implicitUsageProvider implementation="com.netflix.dgs.plugin.provider.DgsImplicitUsageProvider"/>
 
         <treeStructureProvider implementation="com.netflix.dgs.plugin.provider.DgsProjectStructureProvider"/>
