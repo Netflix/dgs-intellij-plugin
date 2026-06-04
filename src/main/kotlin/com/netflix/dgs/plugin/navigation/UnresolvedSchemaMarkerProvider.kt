@@ -27,6 +27,9 @@ import com.netflix.dgs.plugin.DgsConstants
 import com.netflix.dgs.plugin.services.DgsService
 import javax.swing.Icon
 
+private val ROOT_OPERATION_TYPES = setOf("Query", "Mutation", "Subscription")
+private val DIRECTIVES_REQUIRING_RESOLUTION = setOf("requires", "external")
+
 class UnresolvedSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
 
     override fun getName(): String = "DGS Unresolved Schema Elements"
@@ -53,13 +56,28 @@ class UnresolvedSchemaMarkerProvider : RelatedItemLineMarkerProvider() {
 
         val iconBuilder = when (element) {
             is GraphQLFieldDefinition -> {
-                val fetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.schemaPsi == element }
-                if (fetcher == null) {
-                    NavigationGutterIconBuilder.create(DgsConstants.dgsUnresolvedIcon)
-                        .setTargets(emptyList())
-                        .setTooltipText("No DGS data fetcher found")
-                        .createLineMarkerInfo(psiLeaf)
-                } else null
+                // Only flag fields that genuinely need a data fetcher:
+                //   - Fields on Query/Mutation/Subscription (root operations always need one)
+                //   - Fields with @requires/@external (federation resolution can't auto-resolve)
+                // Sub-fields on regular types are auto-resolved by DGS from the parent object's
+                // properties or matching methods (including methods with arguments), so they
+                // don't need an explicit fetcher.
+                val parentTypeName = (element.parent?.parent as? GraphQLNamedElement)?.name
+                val isRootOperationField = parentTypeName in ROOT_OPERATION_TYPES
+                val requiresResolutionLogic = element.directives.any { directive ->
+                    (directive.nameIdentifier as? GraphQLIdentifierImpl)?.name in DIRECTIVES_REQUIRING_RESOLUTION
+                }
+                if (!isRootOperationField && !requiresResolutionLogic) {
+                    null
+                } else {
+                    val fetcher = dgsService.dgsComponentIndex.dataFetchers.find { it.schemaPsi == element }
+                    if (fetcher == null) {
+                        NavigationGutterIconBuilder.create(DgsConstants.dgsUnresolvedIcon)
+                            .setTargets(emptyList())
+                            .setTooltipText("No DGS data fetcher found")
+                            .createLineMarkerInfo(psiLeaf)
+                    } else null
+                }
             }
             is GraphQLObjectTypeDefinition, is GraphQLObjectTypeExtensionDefinition -> {
                 val entityFetcher = dgsService.dgsComponentIndex.entityFetchers.find { it.schemaPsi == element }
