@@ -18,6 +18,7 @@ package com.netflix.dgs.plugin.services.internal;
 
 import com.intellij.lang.jsgraphql.schema.GraphQLSchemaProvider;
 import com.intellij.lang.jsgraphql.schema.GraphQLTypeDefinitionUtil;
+import com.intellij.lang.jsgraphql.types.language.Directive;
 import com.intellij.lang.jsgraphql.types.language.DirectiveDefinition;
 import com.intellij.lang.jsgraphql.types.language.FieldDefinition;
 import com.intellij.lang.jsgraphql.types.language.InterfaceTypeDefinition;
@@ -34,8 +35,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class GraphQLSchemaRegistry {
 
@@ -84,6 +89,76 @@ public class GraphQLSchemaRegistry {
             return Optional.ofNullable(GraphQLTypeDefinitionUtil.findElement(interfaceType.get().getSourceLocation(), psiElement.getProject()));
         }
         return Optional.empty();
+    }
+
+    public List<String> objectTypeNames(@NotNull PsiElement psiElement) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
+        Set<String> names = new LinkedHashSet<>();
+        registry.types().forEach((name, def) -> {
+            if (def instanceof ObjectTypeDefinition && !isIntrospectionName(name)) {
+                names.add(name);
+            }
+        });
+        registry.objectTypeExtensions().keySet().stream().filter(n -> !isIntrospectionName(n)).forEach(names::add);
+        return new ArrayList<>(names);
+    }
+
+    public List<String> interfaceTypeNames(@NotNull PsiElement psiElement) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
+        Set<String> names = new LinkedHashSet<>();
+        registry.types().forEach((name, def) -> {
+            if (def instanceof InterfaceTypeDefinition && !isIntrospectionName(name)) {
+                names.add(name);
+            }
+        });
+        registry.interfaceTypeExtensions().keySet().stream().filter(n -> !isIntrospectionName(n)).forEach(names::add);
+        return new ArrayList<>(names);
+    }
+
+    public List<String> entityTypeNames(@NotNull PsiElement psiElement) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
+        Set<String> names = new LinkedHashSet<>();
+        registry.types().forEach((name, def) -> {
+            if (def instanceof ObjectTypeDefinition
+                    && !isIntrospectionName(name)
+                    && hasKeyDirective(((ObjectTypeDefinition) def).getDirectives())) {
+                names.add(name);
+            }
+        });
+        registry.objectTypeExtensions().forEach((name, exts) -> {
+            if (isIntrospectionName(name)) return;
+            for (ObjectTypeExtensionDefinition ext : exts) {
+                if (hasKeyDirective(ext.getDirectives())) {
+                    names.add(name);
+                    break;
+                }
+            }
+        });
+        return new ArrayList<>(names);
+    }
+
+    // GraphQL spec reserves names starting with "__" for introspection metadata
+    // (e.g., __Schema, __Type, __Directive). Filter them from user-facing completion.
+    private boolean isIntrospectionName(String name) {
+        return name != null && name.startsWith("__");
+    }
+
+    public List<FieldDefinition> fieldDefinitions(@NotNull PsiElement psiElement, @NotNull String typeName) {
+        TypeDefinitionRegistry registry = getRegistry(psiElement);
+        Map<String, FieldDefinition> fields = new LinkedHashMap<>();
+        getTypeDefinitions(registry, typeName).forEach(def ->
+            def.getFieldDefinitions().forEach(f -> fields.putIfAbsent(f.getName(), f)));
+        Optional<InterfaceTypeDefinition> iface = getInterfaceTypeDefinition(registry, typeName);
+        iface.ifPresent(def -> def.getFieldDefinitions().forEach(f -> fields.putIfAbsent(f.getName(), f)));
+        List<InterfaceTypeExtensionDefinition> ifaceExts = registry.interfaceTypeExtensions().get(typeName);
+        if (ifaceExts != null) {
+            ifaceExts.forEach(ext -> ext.getFieldDefinitions().forEach(f -> fields.putIfAbsent(f.getName(), f)));
+        }
+        return new ArrayList<>(fields.values());
+    }
+
+    private boolean hasKeyDirective(List<Directive> directives) {
+        return directives.stream().anyMatch(d -> "key".equals(d.getName()));
     }
 
     public Optional<PsiElement> psiForDirective(@NotNull PsiElement psiElement, @NotNull String name) {
